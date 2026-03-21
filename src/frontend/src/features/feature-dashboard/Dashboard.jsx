@@ -18,6 +18,7 @@ import FactorWaterfall from '../feature-scoring/FactorWaterfall'
 import Recommendations from '../feature-scoring/Recommendations'
 import WhatIfSimulator from '../feature-scoring/WhatIfSimulator'
 import RiskAssessment from '../feature-scoring/RiskAssessment'
+import ChatBubble from '../feature-scoring/ChatBubble'
 import { computeScore, getBand } from '../feature-scoring/scorer'
 
 const ENTRIES_KEY = 'hackerzstreet_entries'
@@ -613,6 +614,9 @@ export default function Dashboard() {
           </motion.div>
         </motion.div>
       )}
+
+      {/* ===== AI CHATBOT ===== */}
+      <ChatBubble scoreResult={backendScore} language={language} />
     </div>
   )
 }

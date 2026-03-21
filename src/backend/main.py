@@ -19,6 +19,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # Import routers from each feature
 from routes import router as scoring_router
 from compute_routes import router as compute_router
+from chat_routes import router as chat_router
 from profile_routes import router as profile_router
 from daily_routes import router as daily_router
 from history_routes import router as history_router
@@ -44,6 +45,7 @@ app.add_middleware(
 # Register all feature routes
 app.include_router(scoring_router)   # /api/score, /api/simulate, /api/personas
 app.include_router(compute_router)   # /api/compute-score (unified)
+app.include_router(chat_router)      # /api/chat (AI chatbot)
 app.include_router(profile_router)   # /api/profile
 app.include_router(daily_router)     # /api/entries
 app.include_router(history_router)   # /api/score-history
