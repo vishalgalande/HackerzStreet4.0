@@ -76,13 +76,13 @@ export default function DailyEntryForm({ onSave, onCancel }) {
 
   return (
     <motion.div
-      className="glass-card rounded-2xl p-6"
+      className="glass-card rounded-2xl p-8"
       initial={{ scale: 0.95 }}
       animate={{ scale: 1 }}
       transition={{ duration: 0.3 }}
     >
-      <div className="flex items-center justify-between mb-5">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-xl font-semibold flex items-center gap-2">
           <span className="text-teal-400">◎</span>
           Log Daily Entry
         </h3>
@@ -97,23 +97,23 @@ export default function DailyEntryForm({ onSave, onCancel }) {
         </motion.button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {/* Date */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Date</label>
+          <label className="block text-[13px] font-medium text-[var(--color-text-muted)] mb-2">Date</label>
           <input
             type="date"
             value={formData.date}
             onChange={(e) => handleChange('date', e.target.value)}
-            className="input-field text-sm"
+            className="input-field text-[15px]"
           />
         </div>
 
         {/* Expenses grid */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-2 gap-4">
           {inputFields.map(({ field, label }) => (
             <div key={field}>
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">
+              <label className="block text-[13px] font-medium text-[var(--color-text-muted)] mb-2">
                 {label} (₹)
               </label>
               <input
@@ -122,7 +122,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
                 onChange={(e) => handleChange(field, e.target.value)}
                 min="0"
                 placeholder="0"
-                className="input-field text-sm"
+                className="input-field text-[15px]"
               />
             </div>
           ))}
@@ -130,7 +130,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
 
         {/* Savings */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">
+          <label className="block text-[13px] font-medium text-[var(--color-text-muted)] mb-2">
             💰 Savings (₹)
           </label>
           <input
@@ -139,7 +139,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
             onChange={(e) => handleChange('savings', e.target.value)}
             min="0"
             placeholder="0"
-            className="input-field text-sm"
+            className="input-field text-[15px]"
           />
         </div>
 
@@ -168,14 +168,14 @@ export default function DailyEntryForm({ onSave, onCancel }) {
               />
             </div>
           </div>
-          <span className="text-sm text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors">
+          <span className="text-[15px] text-[var(--color-text-secondary)] group-hover:text-[var(--color-text-primary)] transition-colors">
             Paid a bill on time today
           </span>
         </label>
 
         {/* Notes */}
         <div>
-          <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">
+          <label className="block text-[13px] font-medium text-[var(--color-text-muted)] mb-2">
             Notes (optional)
           </label>
           <input
@@ -183,7 +183,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
             value={formData.notes}
             onChange={(e) => handleChange('notes', e.target.value)}
             placeholder="e.g., Paid electricity bill"
-            className="input-field text-sm"
+            className="input-field text-[15px]"
           />
         </div>
 
@@ -212,7 +212,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
         </AnimatePresence>
 
         {/* Actions */}
-        <div className="flex gap-3 pt-1">
+        <div className="flex gap-3 pt-2">
           <motion.button
             type="submit"
             disabled={loading}

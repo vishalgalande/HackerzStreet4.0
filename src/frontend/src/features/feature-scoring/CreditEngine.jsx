@@ -82,17 +82,17 @@ function FactorBar({ factor, index }) {
       initial={{ opacity: 0, x: -30 }}
       animate={inView ? { opacity: 1, x: 0 } : {}}
       transition={{ duration: 0.6, delay: index * 0.12, ease: [0.4, 0, 0.2, 1] }}
-      className="glass-card rounded-xl p-5"
+      className="glass-card rounded-2xl p-6"
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-xl" style={{ color: factor.color }}>{factor.icon}</span>
+      <div className="flex items-start justify-between mb-4">
+        <div className="flex items-center gap-4">
+          <span className="text-2xl" style={{ color: factor.color }}>{factor.icon}</span>
           <div>
-            <h4 className="font-semibold text-sm">{factor.label}</h4>
-            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{factor.description}</p>
+            <h4 className="font-semibold text-[16px]">{factor.label}</h4>
+            <p className="text-[14px] text-[var(--color-text-muted)] mt-1 leading-relaxed">{factor.description}</p>
           </div>
         </div>
-        <span className="text-sm font-bold px-2 py-0.5 rounded-full" style={{
+        <span className="text-[14px] font-bold px-3 py-1 rounded-full" style={{
           background: `${factor.color}15`,
           color: factor.color,
         }}>
@@ -110,10 +110,10 @@ function FactorBar({ factor, index }) {
           transition={{ duration: 1.2, delay: index * 0.12 + 0.3, ease: [0.4, 0, 0.2, 1] }}
         />
       </div>
-      <div className="flex justify-between mt-1.5">
-        <span className="text-xs text-[var(--color-text-muted)]">Impact Score</span>
+      <div className="flex justify-between mt-2">
+        <span className="text-[13px] text-[var(--color-text-muted)]">Impact Score</span>
         <motion.span
-          className="text-xs font-medium"
+          className="text-[13px] font-medium"
           style={{ color: factor.color }}
           initial={{ opacity: 0 }}
           animate={inView ? { opacity: 1 } : {}}
@@ -128,7 +128,7 @@ function FactorBar({ factor, index }) {
 
 export default function CreditEngine() {
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-5xl mx-auto">
+    <div className="page-container pb-16">
       {/* Hero */}
       <motion.div
         className="text-center mb-16"
@@ -136,19 +136,19 @@ export default function CreditEngine() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
+        <span className="inline-block px-5 py-2 rounded-full glass-warm text-[13px] font-medium text-[var(--color-gold)] mb-5">
           ⚡ THE CREDIT ENGINE
         </span>
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">
+        <h1 className="text-3xl md:text-5xl font-bold mb-5">
           How Your Score Is <span className="text-gradient">Calculated</span>
         </h1>
-        <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto text-lg">
+        <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto text-lg leading-relaxed">
           No black boxes. Every factor is transparent, research-backed, and within your control.
         </p>
       </motion.div>
 
       {/* Story Steps */}
-      <div className="grid md:grid-cols-3 gap-6 mb-16">
+      <div className="grid md:grid-cols-3 gap-8 mb-16">
         {storySteps.map((step, i) => {
           const ref = useRef(null)
           const inView = useInView(ref, { once: true, margin: '-30px' })
@@ -159,14 +159,14 @@ export default function CreditEngine() {
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="glass-card rounded-xl p-6 text-center"
+              className="glass-card rounded-2xl p-7 text-center"
             >
-              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm mx-auto mb-4">
+              <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-[15px] mx-auto mb-5">
                 {i + 1}
               </div>
-              <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-3">{step.subtitle}</p>
-              <p className="text-xs font-medium text-[var(--color-gold)]">{step.highlight}</p>
+              <h3 className="font-semibold text-xl mb-3">{step.title}</h3>
+              <p className="text-[15px] text-[var(--color-text-secondary)] mb-4 leading-relaxed">{step.subtitle}</p>
+              <p className="text-[14px] font-medium text-[var(--color-gold)]">{step.highlight}</p>
             </motion.div>
           )
         })}
@@ -178,10 +178,10 @@ export default function CreditEngine() {
         animate={{ opacity: 1 }}
         transition={{ delay: 0.3 }}
       >
-        <h2 className="text-2xl font-bold mb-6 text-center">
+        <h2 className="text-2xl font-bold mb-8 text-center">
           Scoring <span className="text-gradient">Factors</span>
         </h2>
-        <div className="space-y-4">
+        <div className="space-y-6">
           {factors.map((factor, i) => (
             <FactorBar key={factor.id} factor={factor} index={i} />
           ))}
@@ -190,17 +190,17 @@ export default function CreditEngine() {
 
       {/* Bottom CTA */}
       <motion.div
-        className="mt-16 text-center glass-card rounded-2xl p-8"
+        className="mt-16 text-center glass-card rounded-2xl p-10"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
       >
-        <h3 className="text-xl font-bold mb-2">Your score is always improvable</h3>
-        <p className="text-[var(--color-text-secondary)] mb-4 text-sm">
+        <h3 className="text-2xl font-bold mb-3">Your score is always improvable</h3>
+        <p className="text-[var(--color-text-secondary)] mb-5 text-[15px] leading-relaxed">
           Every factor above can be influenced by your daily financial behavior.
         </p>
-        <span className="text-[var(--color-gold)] font-medium text-sm">
+        <span className="text-[var(--color-gold)] font-medium text-[15px]">
           Use the What-If Simulator on the Dashboard to see how changes affect your score →
         </span>
       </motion.div>

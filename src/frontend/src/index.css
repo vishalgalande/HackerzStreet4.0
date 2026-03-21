@@ -59,6 +59,8 @@ html {
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
   background-color: var(--color-bg-primary);
   color: var(--color-text-primary);
   min-height: 100vh;
@@ -69,8 +71,14 @@ body {
 
 h1, h2, h3, h4, h5, h6 {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
+
+h1 { font-size: 32px; font-weight: 700; }
+h2 { font-size: 26px; font-weight: 600; }
+h3 { font-size: 20px; font-weight: 600; }
+h4 { font-size: 18px; font-weight: 500; }
 
 /* ============ NEURO-GLASSMORPHISM ============ */
 /* Replacing messy brown glass with hyper-premium forensic glass */
@@ -82,17 +90,20 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.5); /* Slate-900 with high transparency */
+  background: rgba(15, 23, 42, 0.5);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
   border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
   transition: all 0.3s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(20, 184, 166, 0.3); /* Teal hover edge */
+  border-color: rgba(20, 184, 166, 0.25);
   background: rgba(15, 23, 42, 0.7);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(20, 184, 166, 0.1);
+  transform: translateY(-1px);
 }
 
 /* ============ GRADIENTS & GLOWS ============ */
@@ -168,7 +179,7 @@ h1, h2, h3, h4, h5, h6 {
   background: rgba(30, 41, 59, 0.5); /* Faint slate inset */
   border: 1px solid transparent;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   transition: all 0.2s ease;
   outline: none;
 }
@@ -240,11 +251,11 @@ input[type="range"]::-webkit-slider-thumb:hover {
 
 /* System Labels (Forensic Typography) */
 .system-label {
-  font-size: 10px;
+  font-size: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-weight: 600;
-  color: #64748b; /* Slate 500 */
+  color: #94a3b8; /* Slate 400 for better contrast */
 }
 
 .number-morph {
@@ -278,3 +289,72 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .animated-gradient {
   background: var(--color-bg-primary); 
 }
+
+/* ============ LAYOUT SYSTEM ============ */
+/* Global page container — centers content, constrains width */
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 24px;
+  padding-right: 24px;
+}
+
+/* Section spacing */
+.section-gap {
+  margin-bottom: 40px;
+}
+
+/* 12-column grid utility */
+.grid-12 {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 24px;
+}
+
+.col-span-4 { grid-column: span 4; }
+.col-span-6 { grid-column: span 6; }
+.col-span-8 { grid-column: span 8; }
+.col-span-12 { grid-column: span 12; }
+
+@media (max-width: 768px) {
+  .col-span-4, .col-span-6, .col-span-8 {
+    grid-column: span 12;
+  }
+}
+
+/* ============ BRANDING & WATERMARK ============ */
+.nav-logo {
+  height: 32px;
+  width: auto;
+  object-fit: contain;
+}
+
+.main-container {
+  position: relative;
+  min-height: 100vh;
+}
+
+.main-container::before {
+  content: "";
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 500px;
+  height: 500px;
+  background: url('/logo.png') no-repeat center;
+  background-size: contain;
+  opacity: 0.03;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(1px) brightness(1.2);
+}
+
+@media (max-width: 768px) {
+  .main-container::before {
+    width: 300px;
+    height: 300px;
+    opacity: 0.025;
+  }
+}
+

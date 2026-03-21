@@ -1,16 +1,13 @@
 /**
- * AntiImpulsivity — Calm countdown timer with focused design
- * Minimal, mindful UX with breathing animation
+ * AntiImpulsivity — Premium countdown timer
+ * Only 12h and 24h options. Timer text constrained inside circle.
  */
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 const PRESETS = [
-  { label: '5 min', seconds: 300 },
-  { label: '15 min', seconds: 900 },
-  { label: '30 min', seconds: 1800 },
-  { label: '1 hour', seconds: 3600 },
+  { label: '12 hours', seconds: 43200 },
   { label: '24 hours', seconds: 86400 },
 ]
 
@@ -18,32 +15,12 @@ function formatTime(totalSeconds) {
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
   const seconds = totalSeconds % 60
-  if (hours > 0) {
-    return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-  }
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
-
-function TimerDigit({ value }) {
-  return (
-    <AnimatePresence mode="popLayout">
-      <motion.span
-        key={value}
-        initial={{ y: -20, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        exit={{ y: 20, opacity: 0 }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
-        className="inline-block"
-      >
-        {value}
-      </motion.span>
-    </AnimatePresence>
-  )
+  return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
 
 export default function AntiImpulsivity() {
-  const [duration, setDuration] = useState(1800) // 30 min default
-  const [remaining, setRemaining] = useState(1800)
+  const [duration, setDuration] = useState(43200) // 12h default
+  const [remaining, setRemaining] = useState(43200)
   const [running, setRunning] = useState(false)
   const [completed, setCompleted] = useState(false)
   const timerRef = useRef(null)
@@ -88,92 +65,127 @@ export default function AntiImpulsivity() {
   }
 
   const progress = 1 - (remaining / duration)
-  const circumference = 2 * Math.PI * 120
-
-  const display = formatTime(remaining)
-  const chars = display.split('')
+  const circumference = 2 * Math.PI * 115
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 flex flex-col items-center justify-center max-w-2xl mx-auto">
+    <div
+      className="page-container pb-16"
+      style={{
+        maxWidth: '700px',
+        minHeight: '70vh',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: '20px',
+      }}
+    >
       {/* Header */}
       <motion.div
-        className="text-center mb-12"
+        className="text-center"
+        style={{ marginBottom: '12px' }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
       >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
+        <span
+          className="inline-block rounded-full glass-warm font-medium"
+          style={{ padding: '8px 20px', fontSize: '13px', color: 'var(--color-gold)', marginBottom: '20px', display: 'inline-block' }}
+        >
           ◷ MINDFUL SPENDING
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+        <h1 style={{ fontSize: '32px', fontWeight: 700, marginBottom: '12px' }}>
           Pause Before You <span className="text-gradient">Purchase</span>
         </h1>
-        <p className="text-[var(--color-text-secondary)] max-w-md mx-auto">
-          Set a waiting period before impulse purchases. Most urges fade after 30 minutes.
+        <p style={{ fontSize: '16px', color: 'var(--color-text-secondary)', maxWidth: '440px', margin: '0 auto', lineHeight: 1.6 }}>
+          Set a waiting period before impulse purchases. Most urges fade within hours.
         </p>
       </motion.div>
 
       {/* Circular Timer */}
       <motion.div
-        className="relative mb-10"
+        style={{
+          position: 'relative',
+          width: '260px',
+          height: '260px',
+        }}
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         transition={{ duration: 0.6, delay: 0.2 }}
       >
         {/* Breathing ring */}
         <motion.div
-          className="absolute inset-0 rounded-full"
           style={{
-            background: 'radial-gradient(circle, transparent 60%, rgba(196, 101, 42, 0.05) 100%)',
+            position: 'absolute',
+            inset: '-10px',
+            borderRadius: '50%',
+            background: 'radial-gradient(circle, transparent 55%, rgba(20, 184, 166, 0.06) 100%)',
           }}
           animate={running ? {
-            scale: [1, 1.08, 1],
+            scale: [1, 1.06, 1],
             opacity: [0.5, 0.8, 0.5],
           } : {}}
           transition={{ duration: 4, repeat: Infinity, ease: 'easeInOut' }}
         />
 
-        <svg width="280" height="280" viewBox="0 0 280 280">
+        <svg width="260" height="260" viewBox="0 0 260 260">
+          <defs>
+            <linearGradient id="timerGradient" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stopColor="#14b8a6" />
+              <stop offset="100%" stopColor="#06b6d4" />
+            </linearGradient>
+          </defs>
           {/* Background circle */}
           <circle
-            cx="140" cy="140" r="120"
+            cx="130" cy="130" r="115"
             fill="none"
             stroke="var(--color-bg-elevated)"
-            strokeWidth="6"
+            strokeWidth="5"
           />
           {/* Progress arc */}
           <motion.circle
-            cx="140" cy="140" r="120"
+            cx="130" cy="130" r="115"
             fill="none"
             stroke="url(#timerGradient)"
-            strokeWidth="6"
+            strokeWidth="5"
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={circumference * (1 - progress)}
-            transform="rotate(-90 140 140)"
+            transform="rotate(-90 130 130)"
             style={{
-              filter: 'drop-shadow(0 0 8px rgba(196, 101, 42, 0.4))',
+              filter: 'drop-shadow(0 0 8px rgba(20, 184, 166, 0.4))',
               transition: 'stroke-dashoffset 0.5s ease-out',
             }}
           />
-          {/* Gradient def */}
-          <defs>
-            <linearGradient id="timerGradient" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#c4652a" />
-              <stop offset="100%" stopColor="#d4a843" />
-            </linearGradient>
-          </defs>
         </svg>
 
-        {/* Timer display */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <div className="text-5xl md:text-6xl font-bold tracking-wider" style={{ fontVariantNumeric: 'tabular-nums' }}>
-            {chars.map((ch, i) => (
-              <TimerDigit key={`${i}-${ch}`} value={ch} />
-            ))}
-          </div>
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">
-            {completed ? 'Time\'s up! You can decide now.' : running ? 'Stay strong...' : 'Set your waiting period'}
+        {/* Timer text — constrained inside circle */}
+        <div
+          style={{
+            position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            overflow: 'hidden',
+          }}
+        >
+          <span
+            style={{
+              fontSize: '40px',
+              fontWeight: 600,
+              textAlign: 'center',
+              whiteSpace: 'nowrap',
+              fontVariantNumeric: 'tabular-nums',
+              letterSpacing: '2px',
+              color: 'var(--color-text-primary)',
+            }}
+          >
+            {formatTime(remaining)}
+          </span>
+          <p style={{ fontSize: '13px', color: 'var(--color-text-muted)', marginTop: '8px' }}>
+            {completed ? "Time's up!" : running ? 'Stay strong...' : 'Choose duration'}
           </p>
         </div>
       </motion.div>
@@ -185,28 +197,35 @@ export default function AntiImpulsivity() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }}
-            className="glass-card rounded-xl p-4 mb-6 text-center"
+            className="glass-card"
+            style={{ borderRadius: '16px', padding: '24px', textAlign: 'center', maxWidth: '400px', width: '100%' }}
           >
-            <p className="text-[var(--color-gold)] font-semibold mb-1">✦ Timer Complete</p>
-            <p className="text-sm text-[var(--color-text-secondary)]">
+            <p style={{ color: 'var(--color-teal)', fontWeight: 600, fontSize: '16px', marginBottom: '8px' }}>✦ Timer Complete</p>
+            <p style={{ fontSize: '15px', color: 'var(--color-text-secondary)', lineHeight: 1.6 }}>
               Do you still want to make this purchase? If the urge has passed, you just improved your spending discipline!
             </p>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Preset buttons */}
-      <div className="flex flex-wrap gap-2 justify-center mb-6">
+      {/* Preset buttons — ONLY 12h and 24h */}
+      <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
         {PRESETS.map(preset => (
           <motion.button
             key={preset.seconds}
             onClick={() => selectPreset(preset.seconds)}
-            className="px-4 py-2 rounded-lg text-sm font-medium transition-all"
             style={{
-              background: duration === preset.seconds ? 'rgba(196, 101, 42, 0.15)' : 'transparent',
-              border: `1px solid ${duration === preset.seconds ? 'var(--color-burnt-orange)' : 'var(--color-border)'}`,
-              color: duration === preset.seconds ? 'var(--color-gold)' : 'var(--color-text-secondary)',
+              width: '140px',
+              padding: '12px 0',
+              borderRadius: '12px',
+              fontSize: '15px',
+              fontWeight: 600,
+              cursor: running ? 'not-allowed' : 'pointer',
               opacity: running ? 0.5 : 1,
+              transition: 'all 0.2s ease',
+              background: duration === preset.seconds ? 'rgba(20, 184, 166, 0.12)' : 'transparent',
+              border: `1px solid ${duration === preset.seconds ? 'var(--color-teal)' : 'var(--color-border)'}`,
+              color: duration === preset.seconds ? '#14b8a6' : 'var(--color-text-secondary)',
             }}
             whileHover={!running ? { scale: 1.05 } : {}}
             whileTap={!running ? { scale: 0.95 } : {}}
@@ -217,11 +236,12 @@ export default function AntiImpulsivity() {
       </div>
 
       {/* Controls */}
-      <div className="flex gap-3">
+      <div style={{ display: 'flex', gap: '12px' }}>
         {!running ? (
           <motion.button
             onClick={startTimer}
-            className="btn-primary text-lg px-8 py-3"
+            className="btn-primary"
+            style={{ fontSize: '16px', padding: '14px 36px' }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -230,7 +250,8 @@ export default function AntiImpulsivity() {
         ) : (
           <motion.button
             onClick={pauseTimer}
-            className="btn-secondary text-lg px-8 py-3"
+            className="btn-secondary"
+            style={{ fontSize: '16px', padding: '14px 36px' }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
@@ -240,7 +261,8 @@ export default function AntiImpulsivity() {
         {(running || remaining < duration) && (
           <motion.button
             onClick={resetTimer}
-            className="btn-secondary text-lg px-6 py-3"
+            className="btn-secondary"
+            style={{ fontSize: '16px', padding: '14px 28px' }}
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             whileHover={{ scale: 1.05 }}
@@ -253,13 +275,19 @@ export default function AntiImpulsivity() {
 
       {/* Insight */}
       <motion.p
-        className="text-center text-xs text-[var(--color-text-muted)] mt-8 max-w-sm"
+        style={{
+          textAlign: 'center',
+          fontSize: '14px',
+          color: 'var(--color-text-muted)',
+          maxWidth: '380px',
+          lineHeight: 1.6,
+          marginTop: '8px',
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1 }}
       >
-        Research shows that a 30-minute delay eliminates 65% of impulse purchases,
-        directly improving your Spending Discipline score factor.
+        Delaying impulse purchases by 12–24 hours eliminates most unnecessary spending, directly improving your Spending Discipline score.
       </motion.p>
     </div>
   )

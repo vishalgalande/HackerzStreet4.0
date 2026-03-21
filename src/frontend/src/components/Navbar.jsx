@@ -1,6 +1,6 @@
 /**
  * Navbar — Premium glassmorphism navigation bar
- * Fixed top with warm gold accents and animated active indicator
+ * Fixed top, h-[72px], proper spacing, hover backgrounds
  */
 
 import { useState } from 'react'
@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '◎' },
+  { id: 'chimchar', label: 'Chimchar AI', icon: '🔥' },
   { id: 'credit-engine', label: 'Credit Engine', icon: '⚡' },
   { id: 'alerts', label: 'Alerts', icon: '◈' },
   { id: 'investments', label: 'Investments', icon: '△' },
@@ -20,64 +21,78 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50" style={{
-      background: 'rgba(13, 10, 7, 0.85)',
+      background: 'rgba(2, 6, 23, 0.92)',
       backdropFilter: 'blur(24px)',
       WebkitBackdropFilter: 'blur(24px)',
-      borderBottom: '1px solid rgba(212, 168, 67, 0.08)',
+      borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
+      height: '72px',
     }}>
-      <div className="max-w-7xl mx-auto px-4 md:px-8">
-        <div className="flex items-center justify-between h-16">
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 32px', height: '100%' }}>
+        <div className="flex items-center justify-between" style={{ height: '100%' }}>
           {/* Logo */}
           <motion.div
-            className="flex items-center gap-2 cursor-pointer"
+            className="flex items-center cursor-pointer"
+            style={{ gap: '10px' }}
             onClick={() => onNavigate('dashboard')}
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-gold)] flex items-center justify-center text-[var(--color-bg-primary)] font-bold shadow-lg shadow-[#d4a843]/20">
-                FF
-              </div>
-              <span className="text-gradient">FinFix</span>
-            </div>
+            <img src="/logo.png" alt="FinFix Logo" className="nav-logo" />
+            <span className="text-[17px] font-bold text-white tracking-tight">FinFix</span>
           </motion.div>
 
           {/* Desktop Nav */}
-          <div className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <motion.button
-                key={item.id}
-                onClick={() => onNavigate(item.id)}
-                className="relative px-4 py-2 rounded-lg text-sm font-medium transition-colors"
-                style={{
-                  color: activePage === item.id ? 'var(--color-gold)' : 'var(--color-text-secondary)',
-                }}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.97 }}
-              >
-                <span className="flex items-center gap-1.5">
-                  <span className="text-xs">{item.icon}</span>
-                  {item.label}
-                </span>
-                {activePage === item.id && (
-                  <motion.div
-                    layoutId="activeNav"
-                    className="absolute bottom-0 left-2 right-2 h-0.5 rounded-full"
-                    style={{ background: 'linear-gradient(90deg, var(--color-burnt-orange), var(--color-gold))' }}
-                    transition={{ type: 'spring', stiffness: 500, damping: 35 }}
-                  />
-                )}
-              </motion.button>
-            ))}
+          <div className="hidden lg:flex items-center" style={{ gap: '8px' }}>
+            {navItems.map((item) => {
+              const isActive = activePage === item.id
+
+              return (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className="relative transition-all duration-200"
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '15px',
+                    fontWeight: isActive ? 600 : 500,
+                    color: isActive ? '#ffffff' : '#94a3b8',
+                    background: isActive ? 'rgba(20, 184, 166, 0.12)' : 'transparent',
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)'
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) e.currentTarget.style.background = 'transparent'
+                  }}
+                >
+                  <span className="flex items-center gap-2">
+                    <span style={{ fontSize: '13px' }}>{item.icon}</span>
+                    {item.label}
+                  </span>
+                  {isActive && (
+                    <motion.div
+                      layoutId="navActive"
+                      className="absolute bottom-0 left-3 right-3 h-[2px] rounded-t-full bg-teal-400"
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.5 }}
+                    />
+                  )}
+                </button>
+              )
+            })}
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-4">
             {onSignOut && (
               <motion.button
                 onClick={onSignOut}
-                className="hidden md:block px-3 py-1.5 rounded-lg text-sm text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)] transition-colors"
-                style={{ border: '1px solid var(--color-border)' }}
+                className="hidden md:block rounded-lg text-[14px] text-slate-500 hover:text-slate-300 transition-colors"
+                style={{
+                  padding: '8px 16px',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  borderRadius: '8px',
+                }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.97 }}
               >
@@ -89,24 +104,21 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
             <motion.button
               onClick={() => setMobileOpen(!mobileOpen)}
               className="lg:hidden w-10 h-10 flex items-center justify-center rounded-lg"
-              style={{ border: '1px solid var(--color-border)' }}
+              style={{ border: '1px solid rgba(255,255,255,0.08)' }}
               whileTap={{ scale: 0.9 }}
             >
               <div className="flex flex-col gap-1.5">
                 <motion.span
                   animate={mobileOpen ? { rotate: 45, y: 5 } : { rotate: 0, y: 0 }}
-                  className="block w-5 h-0.5 rounded-full"
-                  style={{ background: 'var(--color-text-secondary)' }}
+                  className="block w-5 h-0.5 rounded-full bg-slate-400"
                 />
                 <motion.span
                   animate={mobileOpen ? { opacity: 0 } : { opacity: 1 }}
-                  className="block w-5 h-0.5 rounded-full"
-                  style={{ background: 'var(--color-text-secondary)' }}
+                  className="block w-5 h-0.5 rounded-full bg-slate-400"
                 />
                 <motion.span
                   animate={mobileOpen ? { rotate: -45, y: -5 } : { rotate: 0, y: 0 }}
-                  className="block w-5 h-0.5 rounded-full"
-                  style={{ background: 'var(--color-text-secondary)' }}
+                  className="block w-5 h-0.5 rounded-full bg-slate-400"
                 />
               </div>
             </motion.button>
@@ -124,19 +136,20 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
             transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
             className="lg:hidden overflow-hidden"
             style={{
-              background: 'rgba(13, 10, 7, 0.95)',
-              borderTop: '1px solid rgba(212, 168, 67, 0.08)',
+              background: 'rgba(2, 6, 23, 0.98)',
+              borderTop: '1px solid rgba(255, 255, 255, 0.06)',
             }}
           >
-            <div className="px-4 py-3 space-y-1">
+            <div className="px-6 py-4 space-y-1">
               {navItems.map((item, i) => (
                 <motion.button
                   key={item.id}
                   onClick={() => { onNavigate(item.id); setMobileOpen(false) }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-left"
+                  className="w-full flex items-center gap-3 rounded-lg text-[15px] font-medium transition-colors text-left"
                   style={{
-                    color: activePage === item.id ? 'var(--color-gold)' : 'var(--color-text-secondary)',
-                    background: activePage === item.id ? 'rgba(196, 101, 42, 0.1)' : 'transparent',
+                    padding: '12px 16px',
+                    color: activePage === item.id ? '#14b8a6' : '#94a3b8',
+                    background: activePage === item.id ? 'rgba(20, 184, 166, 0.08)' : 'transparent',
                   }}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -149,7 +162,8 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
               {onSignOut && (
                 <button
                   onClick={() => { onSignOut(); setMobileOpen(false) }}
-                  className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium text-[var(--color-text-muted)] text-left"
+                  className="w-full flex items-center gap-3 rounded-lg text-[15px] font-medium text-slate-500 text-left"
+                  style={{ padding: '12px 16px' }}
                 >
                   ↗ Sign Out
                 </button>

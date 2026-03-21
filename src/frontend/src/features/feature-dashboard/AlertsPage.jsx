@@ -35,7 +35,7 @@ function AlertItem({ alert, index }) {
       {/* Card */}
       <motion.button
         onClick={() => setExpanded(!expanded)}
-        className="w-full text-left glass-card rounded-xl p-4 cursor-pointer"
+        className="w-full text-left glass-card rounded-2xl p-6 cursor-pointer"
         style={{
           borderColor: expanded ? `${alert.color}30` : undefined,
         }}
@@ -43,16 +43,16 @@ function AlertItem({ alert, index }) {
         whileTap={{ scale: 0.995 }}
       >
         <div className="flex items-start justify-between">
-          <div className="flex items-start gap-3">
-            <span className="text-lg mt-0.5" style={{ color: alert.color }}>{alert.icon}</span>
+          <div className="flex items-start gap-4">
+            <span className="text-xl mt-0.5" style={{ color: alert.color }}>{alert.icon}</span>
             <div>
-              <h4 className="font-semibold text-sm">{alert.title}</h4>
-              <p className="text-xs text-[var(--color-text-secondary)] mt-0.5">{alert.summary}</p>
+              <h4 className="font-semibold text-[16px]">{alert.title}</h4>
+              <p className="text-[14px] text-[var(--color-text-secondary)] mt-1 leading-relaxed">{alert.summary}</p>
             </div>
           </div>
           <div className="text-right shrink-0 ml-4">
-            <p className="text-xs text-[var(--color-text-muted)]">{alert.date}</p>
-            <p className="text-xs text-[var(--color-text-muted)]">{alert.time}</p>
+            <p className="text-[13px] text-[var(--color-text-muted)]">{alert.date}</p>
+            <p className="text-[13px] text-[var(--color-text-muted)]">{alert.time}</p>
           </div>
         </div>
 
@@ -66,8 +66,8 @@ function AlertItem({ alert, index }) {
               transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
               className="overflow-hidden"
             >
-              <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
-                <p className="text-sm text-[var(--color-text-secondary)] leading-relaxed">
+              <div className="mt-4 pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
+                <p className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
                   {alert.detail}
                 </p>
               </div>
@@ -81,21 +81,21 @@ function AlertItem({ alert, index }) {
 
 export default function AlertsPage() {
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-3xl mx-auto">
+    <div className="page-container pb-16" style={{ maxWidth: '800px' }}>
       {/* Header */}
       <motion.div
-        className="text-center mb-12"
+        className="text-center mb-14"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
+        <span className="inline-block px-5 py-2 rounded-full glass-warm text-[13px] font-medium text-[var(--color-gold)] mb-5">
           ◈ ALERTS & INSIGHTS
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
           Your <span className="text-gradient">Financial Timeline</span>
         </h1>
-        <p className="text-[var(--color-text-secondary)]">
+        <p className="text-[16px] text-[var(--color-text-secondary)] leading-relaxed">
           Score changes, payment reminders, and personalized insights — all in one place.
         </p>
       </motion.div>
@@ -109,15 +109,15 @@ export default function AlertsPage() {
         />
 
         {mockAlerts.length === 0 ? (
-          <div className="glass-card rounded-2xl p-12 text-center mt-8 ml-8">
-            <span className="text-4xl mb-4 block opacity-50">📫</span>
-            <h3 className="text-xl font-semibold mb-2">No alerts yet</h3>
-            <p className="text-[var(--color-text-secondary)] text-sm max-w-sm mx-auto">
+          <div className="glass-card rounded-2xl p-14 text-center mt-8 ml-8">
+            <span className="text-5xl mb-6 block opacity-50">📫</span>
+            <h3 className="text-2xl font-semibold mb-3">No alerts yet</h3>
+            <p className="text-[var(--color-text-secondary)] text-[15px] max-w-sm mx-auto leading-relaxed">
               Your financial timeline is completely clear. We'll notify you here when there are important score changes or insights.
             </p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {mockAlerts.map((alert, i) => (
               <AlertItem key={alert.id} alert={alert} index={i} />
             ))}

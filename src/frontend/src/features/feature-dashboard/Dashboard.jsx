@@ -18,7 +18,6 @@ import FactorWaterfall from '../feature-scoring/FactorWaterfall'
 import Recommendations from '../feature-scoring/Recommendations'
 import WhatIfSimulator from '../feature-scoring/WhatIfSimulator'
 import RiskAssessment from '../feature-scoring/RiskAssessment'
-import ChatBubble from '../feature-scoring/ChatBubble'
 import { computeScore, getBand } from '../feature-scoring/scorer'
 
 const ENTRIES_KEY = 'hackerzstreet_entries'
@@ -376,271 +375,202 @@ export default function Dashboard() {
   const totalDebt = profile?.existing_debt || 0
 
   return (
-    <div className="min-h-screen pt-20 pb-16 px-4 md:px-8 max-w-6xl mx-auto">
-      {/* ===== HERO: Score Gauge ===== */}
-      <motion.div
-        className="glass-card rounded-2xl p-8 mb-8 relative overflow-hidden"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full opacity-10"
-          style={{ background: `radial-gradient(circle, ${scoreResult.color}, transparent 70%)` }} />
+    <div className="page-container pb-16" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      
+      {/* TOP SECTION: Horizontal Card for Selectors & Actions */}
+      <div className="glass-card rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800/60 shadow-lg">
+        <div className="flex items-center gap-5 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Profile:</span>
+            <select value={occupation} onChange={(e) => setOccupation(e.target.value)} className="bg-slate-800/50 border border-slate-700 text-slate-200 text-[15px] rounded-lg px-4 py-2 focus:ring-1 focus:ring-teal-500 outline-none cursor-pointer hover:bg-slate-700 transition-colors">
+              {occupations.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+            </select>
+          </div>
+          <div className="w-px h-7 bg-slate-700 shrink-0 hidden md:block" />
+          <div className="flex items-center gap-1.5 bg-slate-800/30 p-1.5 rounded-lg border border-slate-700/50 shrink-0">
+            {timelines.map(t => (
+              <button key={t.value} onClick={() => setTimeline(t.value)} className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all ${timeline === t.value ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
+                {t.label}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="flex items-center gap-3 shrink-0">
+          <button onClick={() => setShowEntryForm(true)} className="bg-slate-800/80 hover:bg-slate-700 text-teal-400 border border-teal-500/20 px-5 py-2.5 rounded-xl text-[15px] font-medium transition-colors">
+            + Log Today
+          </button>
+          <button onClick={computeBackendScore} disabled={computing} className="bg-teal-500 hover:bg-teal-400 text-slate-900 px-6 py-2.5 rounded-xl text-[15px] font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+            {computing ? 'Computing...' : 'Refresh Score'}
+          </button>
+        </div>
+      </div>
 
-        <div className="relative z-10">
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-2xl font-bold">Your Credit Score</h1>
-              <p className="text-sm text-[var(--color-text-secondary)]">{user?.email || 'Dashboard'}</p>
-            </div>
-            <div className="flex gap-2">
-              <motion.button
-                onClick={() => setLanguage(language === 'en' ? 'hi' : 'en')}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium"
-                style={{ border: '1px solid var(--color-border)' }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {language === 'en' ? 'हिंदी' : 'English'}
-              </motion.button>
-              <motion.button
-                onClick={() => setShowEntryForm(true)}
-                className="btn-primary text-sm py-2 px-4"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                + Log Today
-              </motion.button>
-              <motion.button
-                onClick={computeBackendScore}
-                disabled={computing}
-                className="btn-primary text-sm py-2 px-4"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {computing ? '⏳ Computing...' : backendScore ? '↻ Recompute' : '⚡ Compute Score'}
-              </motion.button>
-              <motion.button
-                onClick={signOut}
-                className="px-3 py-1.5 rounded-lg text-xs font-medium text-[var(--color-text-muted)]"
-                style={{ border: '1px solid var(--color-border)' }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                Sign Out
-              </motion.button>
+      {/* ROW 1: 3 Cards (Bills, Score Gauge, Tips) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        
+        {/* Bills & Loans */}
+        <div className="lg:col-span-4 xl:col-span-3 glass-card rounded-2xl p-7 border border-slate-800/60 flex flex-col justify-between hover:border-slate-700 transition-colors shadow-lg">
+          <div>
+            <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+              <span className="text-base">◎</span> Bills & Loans
+            </h3>
+            <div className="space-y-6">
+              <div>
+                <p className="text-[13px] text-slate-400 mb-1.5">On-time History</p>
+                <p className="text-3xl font-bold text-emerald-400 tracking-tight">{billsOnTime}</p>
+              </div>
+              <div className="w-full h-px bg-slate-800/50" />
+              <div>
+                <p className="text-[13px] text-slate-400 mb-1.5">Active Debt Profile</p>
+                <p className="text-2xl font-medium text-slate-200 tracking-tight">₹{totalDebt.toLocaleString()}</p>
+              </div>
             </div>
           </div>
+          <p className="text-[13px] text-slate-500 mt-8 leading-relaxed">Derived from {entries.length} registered entries.</p>
+        </div>
 
-          {/* Score gauge center */}
-          <div className="flex justify-center mb-4">
-            <ScoreGauge
-              score={scoreResult.score}
-              band={scoreResult.band}
-              bandColor={scoreResult.color}
-              confidenceMargin={backendScore?.data_quality?.entry_count >= 14 ? 15 : 28}
-              benchmarkPercentile={scoreResult.score >= 700 ? 78 : scoreResult.score >= 600 ? 52 : 28}
-            />
-          </div>
-
-          {/* Data quality */}
+        {/* Central Score Gauge */}
+        <div className="lg:col-span-4 xl:col-span-6 glass-card rounded-2xl p-10 border border-slate-800/60 relative overflow-hidden flex flex-col items-center justify-center min-h-[380px] shadow-xl hover:shadow-[0_0_40px_rgba(20,184,166,0.05)] transition-shadow group">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-1000" style={{ background: scoreResult.color }} />
+          
+          <ScoreGauge
+            score={scoreResult.score}
+            band={scoreResult.band}
+            bandColor={scoreResult.color}
+            confidenceMargin={backendScore?.data_quality?.entry_count >= 14 ? 15 : 28}
+            benchmarkPercentile={scoreResult.score >= 700 ? 78 : scoreResult.score >= 600 ? 52 : 28}
+          />
+          
           {backendScore?.data_quality && (
-            <div className={`text-center text-xs px-4 py-2 rounded-lg mb-4 ${
+            <div className={`mt-8 text-[13px] px-4 py-1.5 rounded-full border tracking-wide uppercase ${
               backendScore.data_quality.entry_count >= 14
-                ? 'bg-green-400/10 text-green-400'
+                ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
                 : backendScore.data_quality.entry_count > 0
-                ? 'bg-yellow-400/10 text-yellow-400'
-                : 'bg-red-400/10 text-red-400'
+                ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
+                : 'bg-rose-500/5 text-rose-400 border-rose-500/20'
             }`}>
               {backendScore.data_quality.confidence_note}
             </div>
           )}
+        </div>
 
-          {/* Controls: Occupation + Timeline */}
-          <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
-            <div>
-              <label className="block mb-2 system-label">Occupation</label>
-              <motion.select
-                value={occupation}
-                onChange={(e) => setOccupation(e.target.value)}
-                className="input-field text-sm"
-                whileFocus={{ scale: 1.01 }}
-              >
-                {occupations.map(o => (
-                  <option key={o.value} value={o.value}>{o.label}</option>
-                ))}
-              </motion.select>
-            </div>
-            <div>
-              <label className="block mb-2 system-label">Income Timeline</label>
-              <div className="flex gap-1 p-1 rounded-lg bg-[rgba(30,41,59,0.5)]">
-                {timelines.map(t => (
-                  <button
-                    key={t.value}
-                    onClick={() => setTimeline(t.value)}
-                    className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
-                      timeline === t.value
-                        ? 'bg-white text-slate-900 shadow-sm'
-                        : 'text-slate-400 hover:text-white'
-                    }`}
-                  >
-                    {t.label}
-                  </button>
-                ))}
+        {/* Improve Score Tips */}
+        <div className="lg:col-span-4 xl:col-span-3 glass-card rounded-2xl p-7 border border-slate-800/60 flex flex-col hover:border-slate-700 transition-colors shadow-lg">
+          <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+            <span className="text-base">⚡</span> Quick Improvements
+          </h3>
+          
+          <div className="flex-1 space-y-4">
+            {recommendations.slice(0, 3).map((rec, i) => (
+              <div key={i} className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 hover:bg-slate-800/60 transition-colors">
+                <p className="text-[14px] font-medium text-slate-200 mb-3 leading-snug">{rec.action}</p>
+                <div className="flex items-center justify-between">
+                  <span className="text-[13px] text-slate-500 flex items-center gap-1.5">⏱ {rec.timeframe}</span>
+                  <span className="text-[13px] font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded">+{rec.impact_min}-{rec.impact_max} pts</span>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      </motion.div>
 
-      {/* ===== DASHBOARD TABS ===== */}
-      <div className="flex gap-4 mb-8 p-1 rounded-xl glass w-fit md:mx-auto overflow-x-auto no-scrollbar">
-        {[
-          { id: 'overview', label: 'Overview', icon: '◎' },
-          { id: 'analytics', label: 'Analytics', icon: '◈' },
-          { id: 'simulator', label: 'Simulator', icon: '△' },
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id)}
-            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              activeTab === tab.id
-                ? 'bg-[var(--color-bg-elevated)] text-[var(--color-gold)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-white'
-            }`}
-          >
-            <span>{tab.icon}</span>
-            {tab.label}
-          </button>
-        ))}
       </div>
 
-      {activeTab === 'overview' && (
-      <>
-      {/* ===== KEY CARDS ===== */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {[
-          {
-            title: 'Bills & Loans',
-            icon: '◎',
-            color: 'var(--color-text-secondary)',
-            stats: [
-              { label: 'On-time payments', value: billsOnTime, highlight: true },
-              { label: 'Monthly EMI', value: `₹${totalDebt.toLocaleString()}/mo` },
-              { label: 'Logged entries', value: `${entries.length}` },
-            ],
-          },
-          {
-            title: 'Credit Score',
-            icon: '△',
-            color: 'var(--color-text-secondary)',
-            stats: [
-              { label: 'Current', value: scoreResult.score.toString() },
-              { label: 'Band', value: scoreResult.band },
-              { label: 'Source', value: backendScore ? 'Backend verified' : 'Client estimate' },
-            ],
-          },
-          {
-            title: 'Improve Score',
-            icon: '⚡',
-            color: 'var(--color-text-secondary)',
-            stats: [
-              { label: 'Top action', value: recommendations[0]?.action?.split(' ').slice(0, 3).join(' ') || 'Pay bills', accent: true },
-              { label: 'Potential gain', value: recommendations[0] ? `+${recommendations[0].impact_min}-${recommendations[0].impact_max} pts` : '+15-25 pts', highlight: true },
-              { label: 'Effort', value: recommendations[0]?.effort || 'Medium' },
-            ],
-          },
-        ].map((card, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5, delay: i * 0.1 }}
-            viewport={{ once: true }}
-            className="glass-card rounded-xl p-5 card-tilt"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <span className="text-lg" style={{ color: card.color }}>{card.icon}</span>
-              <h3 className="font-semibold">{card.title}</h3>
-            </div>
-            <div className="space-y-2.5">
-              {card.stats.map((stat, j) => (
-                <div key={j} className="flex justify-between text-sm">
-                  <span className="text-[var(--color-text-muted)]">{stat.label}</span>
-                  <span className={`font-medium ${stat.highlight ? 'text-emerald-500' : stat.accent ? 'text-teal-400' : 'text-[var(--color-text-primary)]'}`}>
-                    {stat.value}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        ))}
-      </div>
-      </>
-      )}
-
-      {activeTab === 'analytics' && (
-      <>
-      {/* ===== CHARTS ===== */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
-        <motion.div
-          className="glass-card rounded-xl p-5"
-          initial={{ opacity: 0, x: -20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="font-semibold mb-4">Score Trend</h3>
-          <TrendChart data={scoreHistory} />
-        </motion.div>
-
-        <motion.div
-          className="glass-card rounded-xl p-5"
-          initial={{ opacity: 0, x: 20 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <h3 className="font-semibold mb-4">Spending Breakdown</h3>
-          <DonutChart data={spendingBreakdown} />
-        </motion.div>
-      </div>
-
-      {/* ===== FACTOR BREAKDOWN & RECOMMENDATIONS ===== */}
-      <div className="space-y-6 mb-8">
-        <FactorWaterfall factors={factorContributions} language={language} />
-        <Recommendations recommendations={recommendations} language={language} />
-      </div>
-
-      {/* ===== RISK ASSESSMENT ===== */}
-      {backendScore?.risk_assessment && (
-        <div className="mb-8">
-          <RiskAssessment riskData={backendScore.risk_assessment} language={language} />
+      {/* ROW 2: Upcoming Payments & Trend Graph */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-7 glass-card rounded-2xl p-7 md:p-8 border border-slate-800/60 shadow-lg">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-[14px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
+              <span className="text-lg">📅</span> Upcoming Payments
+            </h3>
+            <button className="text-[13px] text-teal-400 hover:text-teal-300 transition-colors bg-teal-500/10 px-3 py-1.5 rounded-lg">View All</button>
+          </div>
+          
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-[13px] text-slate-500 uppercase tracking-wider">
+                  <th className="pb-4 font-medium">Biller / Institution</th>
+                  <th className="pb-4 font-medium">Type</th>
+                  <th className="pb-4 font-medium">Due Date</th>
+                  <th className="pb-4 text-right font-medium">Amount</th>
+                </tr>
+              </thead>
+              <tbody className="text-[15px]">
+                <tr className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-rose-400 text-lg">⚡</div>
+                    Lumiere Energy
+                  </td>
+                  <td className="py-5 text-slate-400">Utility</td>
+                  <td className="py-5 text-orange-400 font-medium">Tomorrow</td>
+                  <td className="py-5 text-right text-slate-200 font-bold">₹1,450</td>
+                </tr>
+                <tr className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
+                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-teal-400 text-lg">📱</div>
+                    AirNet Telecom
+                  </td>
+                  <td className="py-5 text-slate-400">Internet</td>
+                  <td className="py-5 text-slate-300 font-medium">Oct 14</td>
+                  <td className="py-5 text-right text-slate-200 font-bold">₹999</td>
+                </tr>
+                <tr className="hover:bg-slate-800/20 transition-colors">
+                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
+                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-emerald-400 text-lg">🏦</div>
+                    HDFC Auto Loan
+                  </td>
+                  <td className="py-5 text-slate-400">EMI</td>
+                  <td className="py-5 text-slate-300 font-medium">Oct 20</td>
+                  <td className="py-5 text-right text-slate-200 font-bold">₹12,500</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      )}
-      </>
-      )}
 
-      {activeTab === 'simulator' && (
-      <>
-      {/* ===== WHAT-IF SIMULATOR ===== */}
-      <WhatIfSimulator originalInput={profileData} originalScore={scoreResult.score} />
-      </>
-      )}
+        {/* Trend Graph */}
+        <div className="lg:col-span-5 glass-card rounded-2xl p-7 md:p-8 border border-slate-800/60 shadow-lg flex flex-col">
+          <h3 className="text-[14px] font-semibold text-slate-400 uppercase tracking-wider mb-8 flex items-center gap-2">
+            <span className="text-lg">📈</span> Trajectory Forecast
+          </h3>
+          <div className="flex-1 flex flex-col justify-center min-h-[220px]">
+             <TrendChart data={scoreHistory} />
+             <p className="text-[13px] text-center text-slate-500 mt-8">
+               Historic variance logged across system resets.
+             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 3: Action Buttons */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+          <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-rose-500/20 transition-all">💳</div>
+          <span className="text-[15px] font-medium text-slate-200">Pay Outstanding Bills</span>
+        </button>
+        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">📉</div>
+          <span className="text-[15px] font-medium text-slate-200">Reduce Active Debt</span>
+        </button>
+        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+          <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">💰</div>
+          <span className="text-[15px] font-medium text-slate-200">Boost Savings Rate</span>
+        </button>
+      </div>
 
       {/* ===== DAILY ENTRY FORM MODAL ===== */}
       {showEntryForm && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-900/40 backdrop-blur-md"
+          className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-950/60 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
         >
           <motion.div
             className="w-full max-w-lg"
-            initial={{ scale: 0.95, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.3 }}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            transition={{ type: "spring", bounce: 0.3 }}
           >
             <DailyEntryForm
               onSave={handleEntrySaved}
@@ -650,8 +580,6 @@ export default function Dashboard() {
         </motion.div>
       )}
 
-      {/* ===== AI CHATBOT ===== */}
-      <ChatBubble scoreResult={backendScore} language={language} />
     </div>
   )
 }
