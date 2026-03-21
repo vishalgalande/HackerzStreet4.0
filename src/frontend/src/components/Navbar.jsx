@@ -34,12 +34,12 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
           >
-            <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center text-white font-bold text-sm">
-              CR
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg bg-[var(--color-gold)] flex items-center justify-center text-[var(--color-bg-primary)] font-bold shadow-lg shadow-[#d4a843]/20">
+                FF
+              </div>
+              <span className="text-gradient">FinFix</span>
             </div>
-            <span className="font-semibold text-lg hidden sm:block">
-              <span className="text-gradient">CreditRise</span>
-            </span>
           </motion.div>
 
           {/* Desktop Nav */}

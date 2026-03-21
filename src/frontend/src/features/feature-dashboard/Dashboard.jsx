@@ -197,6 +197,7 @@ function TrendChart({ data }) {
 
 export default function Dashboard() {
   const { user, profile, getToken, signOut } = useAuth()
+  const [activeTab, setActiveTab] = useState('overview')
   const [entries, setEntries] = useState(() => loadEntries())
   const [showEntryForm, setShowEntryForm] = useState(false)
   const [occupation, setOccupation] = useState(profile?.employment_type || 'freelance')
@@ -344,18 +345,18 @@ export default function Dashboard() {
       })
       if (res.ok) {
         const data = await res.json()
-          setBackendScore({
-            score: data.score,
-            band: data.band,
-            color: data.band_color,
-            factors: data.factors.reduce((acc, f) => ({ ...acc, [f.factor]: 50 + (f.points / 600 * 100 / (({ payment_consistency: 0.30, savings_ratio: 0.25, income_stability: 0.20, spending_discipline: 0.15, debt_to_income: 0.10 })[f.factor] || 0.2)) }), {}),
-            factors_list: data.factors,
-            recommendations: data.recommendations,
-            risk_assessment: data.risk_assessment,
-            data_quality: data.data_quality,
-            summary: data.summary,
-            summary_hi: data.summary_hi,
-          })
+        setBackendScore({
+          score: data.score,
+          band: data.band,
+          color: data.band_color,
+          factors: data.factors.reduce((acc, f) => ({ ...acc, [f.factor]: 50 + (f.points / 600 * 100 / (({ payment_consistency: 0.30, savings_ratio: 0.25, income_stability: 0.20, spending_discipline: 0.15, debt_to_income: 0.10 })[f.factor] || 0.2)) }), {}),
+          factors_list: data.factors,
+          recommendations: data.recommendations,
+          risk_assessment: data.risk_assessment,
+          data_quality: data.data_quality,
+          summary: data.summary,
+          summary_hi: data.summary_hi,
+        })
         // Save to history
         const newHistory = [...scoreHistory, data.score].slice(-12)
         setScoreHistory(newHistory)
@@ -458,7 +459,7 @@ export default function Dashboard() {
           {/* Controls: Occupation + Timeline */}
           <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
             <div>
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Occupation</label>
+              <label className="block mb-2 system-label">Occupation</label>
               <motion.select
                 value={occupation}
                 onChange={(e) => setOccupation(e.target.value)}
@@ -471,21 +472,20 @@ export default function Dashboard() {
               </motion.select>
             </div>
             <div>
-              <label className="block text-xs font-medium text-[var(--color-text-muted)] mb-1.5">Income Timeline</label>
-              <div className="flex gap-1 p-1 rounded-lg" style={{ background: 'var(--color-bg-primary)' }}>
+              <label className="block mb-2 system-label">Income Timeline</label>
+              <div className="flex gap-1 p-1 rounded-lg bg-[rgba(30,41,59,0.5)]">
                 {timelines.map(t => (
-                  <motion.button
+                  <button
                     key={t.value}
                     onClick={() => setTimeline(t.value)}
-                    className="flex-1 py-2 rounded-md text-xs font-medium transition-all"
-                    style={{
-                      background: timeline === t.value ? 'linear-gradient(135deg, var(--color-burnt-orange), var(--color-amber))' : 'transparent',
-                      color: timeline === t.value ? 'white' : 'var(--color-text-muted)',
-                    }}
-                    whileTap={{ scale: 0.95 }}
+                    className={`flex-1 py-1.5 rounded-md text-xs font-medium transition-all ${
+                      timeline === t.value
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-400 hover:text-white'
+                    }`}
                   >
                     {t.label}
-                  </motion.button>
+                  </button>
                 ))}
               </div>
             </div>
@@ -493,15 +493,39 @@ export default function Dashboard() {
         </div>
       </motion.div>
 
+      {/* ===== DASHBOARD TABS ===== */}
+      <div className="flex gap-4 mb-8 p-1 rounded-xl glass w-fit md:mx-auto overflow-x-auto no-scrollbar">
+        {[
+          { id: 'overview', label: 'Overview', icon: '◎' },
+          { id: 'analytics', label: 'Analytics', icon: '◈' },
+          { id: 'simulator', label: 'Simulator', icon: '△' },
+        ].map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
+              activeTab === tab.id
+                ? 'bg-[var(--color-bg-elevated)] text-[var(--color-gold)] shadow-sm'
+                : 'text-[var(--color-text-secondary)] hover:text-white'
+            }`}
+          >
+            <span>{tab.icon}</span>
+            {tab.label}
+          </button>
+        ))}
+      </div>
+
+      {activeTab === 'overview' && (
+      <>
       {/* ===== KEY CARDS ===== */}
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         {[
           {
             title: 'Bills & Loans',
             icon: '◎',
-            color: '#10B981',
+            color: 'var(--color-text-secondary)',
             stats: [
-              { label: 'On-time payments', value: billsOnTime },
+              { label: 'On-time payments', value: billsOnTime, highlight: true },
               { label: 'Monthly EMI', value: `₹${totalDebt.toLocaleString()}/mo` },
               { label: 'Logged entries', value: `${entries.length}` },
             ],
@@ -509,7 +533,7 @@ export default function Dashboard() {
           {
             title: 'Credit Score',
             icon: '△',
-            color: '#d4a843',
+            color: 'var(--color-text-secondary)',
             stats: [
               { label: 'Current', value: scoreResult.score.toString() },
               { label: 'Band', value: scoreResult.band },
@@ -519,10 +543,10 @@ export default function Dashboard() {
           {
             title: 'Improve Score',
             icon: '⚡',
-            color: '#c4652a',
+            color: 'var(--color-text-secondary)',
             stats: [
-              { label: 'Top action', value: recommendations[0]?.action?.split(' ').slice(0, 3).join(' ') || 'Pay bills' },
-              { label: 'Potential gain', value: recommendations[0] ? `+${recommendations[0].impact_min}-${recommendations[0].impact_max} pts` : '+15-25 pts' },
+              { label: 'Top action', value: recommendations[0]?.action?.split(' ').slice(0, 3).join(' ') || 'Pay bills', accent: true },
+              { label: 'Potential gain', value: recommendations[0] ? `+${recommendations[0].impact_min}-${recommendations[0].impact_max} pts` : '+15-25 pts', highlight: true },
               { label: 'Effort', value: recommendations[0]?.effort || 'Medium' },
             ],
           },
@@ -543,14 +567,20 @@ export default function Dashboard() {
               {card.stats.map((stat, j) => (
                 <div key={j} className="flex justify-between text-sm">
                   <span className="text-[var(--color-text-muted)]">{stat.label}</span>
-                  <span className="font-medium" style={{ color: card.color }}>{stat.value}</span>
+                  <span className={`font-medium ${stat.highlight ? 'text-emerald-500' : stat.accent ? 'text-teal-400' : 'text-[var(--color-text-primary)]'}`}>
+                    {stat.value}
+                  </span>
                 </div>
               ))}
             </div>
           </motion.div>
         ))}
       </div>
+      </>
+      )}
 
+      {activeTab === 'analytics' && (
+      <>
       {/* ===== CHARTS ===== */}
       <div className="grid md:grid-cols-2 gap-6 mb-8">
         <motion.div
@@ -588,15 +618,20 @@ export default function Dashboard() {
           <RiskAssessment riskData={backendScore.risk_assessment} language={language} />
         </div>
       )}
+      </>
+      )}
 
+      {activeTab === 'simulator' && (
+      <>
       {/* ===== WHAT-IF SIMULATOR ===== */}
       <WhatIfSimulator originalInput={profileData} originalScore={scoreResult.score} />
+      </>
+      )}
 
       {/* ===== DAILY ENTRY FORM MODAL ===== */}
       {showEntryForm && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          style={{ background: 'rgba(0, 0, 0, 0.6)', backdropFilter: 'blur(8px)' }}
+          className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-900/40 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

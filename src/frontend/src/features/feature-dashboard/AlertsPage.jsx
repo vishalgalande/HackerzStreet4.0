@@ -6,74 +6,7 @@
 import { useState, useRef } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 
-const mockAlerts = [
-  {
-    id: 1,
-    type: 'score_change',
-    date: '2026-03-21',
-    time: '09:15 AM',
-    title: 'Credit Score Updated',
-    summary: 'Your score increased by +18 points',
-    detail: 'Your consistent bill payments over the last 30 days have contributed to a significant score improvement. Payment consistency factor increased from 72 to 85.',
-    icon: '↑',
-    color: '#10B981',
-  },
-  {
-    id: 2,
-    type: 'tip',
-    date: '2026-03-19',
-    time: '02:30 PM',
-    title: 'Savings Goal Milestone',
-    summary: 'You\'ve reached 15% savings rate this month!',
-    detail: 'Great progress! You\'re now in the "Good" savings discipline bracket. Reaching 20% would add an estimated +12 more points to your score.',
-    icon: '◇',
-    color: '#d4a843',
-  },
-  {
-    id: 3,
-    type: 'warning',
-    date: '2026-03-17',
-    time: '11:00 AM',
-    title: 'Spending Alert',
-    summary: 'Discretionary spending rose by 25% this week',
-    detail: 'Your discretionary spending reached ₹4,500 this week compared to ₹3,600 last week. High discretionary spending relative to income impacts your Spending Discipline factor.',
-    icon: '⚠',
-    color: '#c4652a',
-  },
-  {
-    id: 4,
-    type: 'reminder',
-    date: '2026-03-15',
-    time: '08:00 AM',
-    title: 'Bill Payment Reminder',
-    summary: 'Electricity bill due in 2 days',
-    detail: 'Your electricity bill of ₹1,200 is due on March 17. Paying on time strengthens your Payment Consistency score — the #1 weighted factor at 30%.',
-    icon: '◎',
-    color: '#d4940a',
-  },
-  {
-    id: 5,
-    type: 'achievement',
-    date: '2026-03-12',
-    time: '06:00 PM',
-    title: 'Achievement Unlocked!',
-    summary: '7-day consecutive logging streak',
-    detail: 'You\'ve logged your finances for 7 days straight! Consistent data entry helps us build a more accurate and confident credit profile for you.',
-    icon: '★',
-    color: '#b87333',
-  },
-  {
-    id: 6,
-    type: 'score_change',
-    date: '2026-03-08',
-    time: '09:00 AM',
-    title: 'Monthly Score Report',
-    summary: 'February score: 542 (Fair)',
-    detail: 'Your February score was 542, placing you in the Fair band. Top improvement area: increase savings rate from 10% to 15% for an estimated +15 point boost.',
-    icon: '◈',
-    color: '#d4a843',
-  },
-]
+const mockAlerts = []
 
 function AlertItem({ alert, index }) {
   const [expanded, setExpanded] = useState(false)
@@ -175,11 +108,21 @@ export default function AlertsPage() {
           style={{ background: 'linear-gradient(to bottom, var(--color-burnt-orange), var(--color-gold), transparent)' }}
         />
 
-        <div className="space-y-4">
-          {mockAlerts.map((alert, i) => (
-            <AlertItem key={alert.id} alert={alert} index={i} />
-          ))}
-        </div>
+        {mockAlerts.length === 0 ? (
+          <div className="glass-card rounded-2xl p-12 text-center mt-8 ml-8">
+            <span className="text-4xl mb-4 block opacity-50">📫</span>
+            <h3 className="text-xl font-semibold mb-2">No alerts yet</h3>
+            <p className="text-[var(--color-text-secondary)] text-sm max-w-sm mx-auto">
+              Your financial timeline is completely clear. We'll notify you here when there are important score changes or insights.
+            </p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {mockAlerts.map((alert, i) => (
+              <AlertItem key={alert.id} alert={alert} index={i} />
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )

@@ -5,12 +5,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, useInView } from 'framer-motion'
 
-const savingsGoals = [
-  { id: 1, name: 'Emergency Fund', target: 30000, current: 18500, icon: '🛡️', color: '#10B981' },
-  { id: 2, name: 'Rent Buffer', target: 12000, current: 9600, icon: '🏠', color: '#d4a843' },
-  { id: 3, name: 'Skill Course', target: 8000, current: 3200, icon: '📚', color: '#c4652a' },
-  { id: 4, name: 'Bike Down Payment', target: 25000, current: 7500, icon: '🏍️', color: '#b87333' },
-]
+const savingsGoals = []
 
 function AnimatedNumber({ target, duration = 1500, prefix = '' }) {
   const [value, setValue] = useState(0)
@@ -178,44 +173,59 @@ export default function SavingsPage() {
         </p>
       </motion.div>
 
-      {/* Piggy Bank + Total */}
-      <div className="glass-card rounded-2xl p-8 mb-8">
-        <div className="grid md:grid-cols-2 gap-8 items-center">
-          <PiggyBank fillPercent={overallPercent} />
-          <div className="text-center md:text-left">
-            <p className="text-sm text-[var(--color-text-muted)] mb-1">Total Saved</p>
-            <p className="text-4xl font-bold text-gradient mb-2">
-              ₹<AnimatedNumber target={totalSaved} />
-            </p>
-            <p className="text-sm text-[var(--color-text-secondary)] mb-4">
-              of ₹{totalTarget.toLocaleString()} goal ({overallPercent}%)
-            </p>
-
-            {/* Overall progress */}
-            <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
-              <motion.div
-                className="h-full rounded-full"
-                style={{ background: 'linear-gradient(90deg, var(--color-burnt-orange), var(--color-gold))' }}
-                initial={{ width: 0 }}
-                animate={{ width: `${overallPercent}%` }}
-                transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
-              />
-            </div>
-
-            <p className="text-xs text-[var(--color-text-muted)] mt-3">
-              💡 Savings discipline is worth <span className="text-[var(--color-gold)] font-medium">25%</span> of your credit score
-            </p>
-          </div>
+      {savingsGoals.length === 0 ? (
+        <div className="glass-card rounded-2xl p-12 text-center mt-8">
+          <span className="text-4xl mb-4 block opacity-50">🎯</span>
+          <h3 className="text-xl font-semibold mb-2">No active savings goals</h3>
+          <p className="text-[var(--color-text-secondary)] text-sm mb-6 max-w-sm mx-auto">
+            You haven't set up any savings goals yet. Creating a goal and contributing to it regularly helps build a strong credit profile.
+          </p>
+          <button className="btn-primary">
+            + Create your first goal
+          </button>
         </div>
-      </div>
+      ) : (
+        <>
+          {/* Piggy Bank + Total */}
+          <div className="glass-card rounded-2xl p-8 mb-8">
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <PiggyBank fillPercent={overallPercent} />
+              <div className="text-center md:text-left">
+                <p className="text-sm text-[var(--color-text-muted)] mb-1">Total Saved</p>
+                <p className="text-4xl font-bold text-gradient mb-2">
+                  ₹<AnimatedNumber target={totalSaved} />
+                </p>
+                <p className="text-sm text-[var(--color-text-secondary)] mb-4">
+                  of ₹{totalTarget.toLocaleString()} goal ({overallPercent || 0}%)
+                </p>
 
-      {/* Goals grid */}
-      <h2 className="text-xl font-bold mb-4">Savings <span className="text-gradient">Goals</span></h2>
-      <div className="grid md:grid-cols-2 gap-4">
-        {savingsGoals.map((goal, i) => (
-          <GoalCard key={goal.id} goal={goal} index={i} />
-        ))}
-      </div>
+                {/* Overall progress */}
+                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
+                  <motion.div
+                    className="h-full rounded-full"
+                    style={{ background: 'linear-gradient(90deg, var(--color-teal), var(--color-cyan))' }}
+                    initial={{ width: 0 }}
+                    animate={{ width: `${overallPercent || 0}%` }}
+                    transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
+                  />
+                </div>
+
+                <p className="text-xs text-[var(--color-text-muted)] mt-3">
+                  💡 Savings discipline is worth <span className="text-teal-400 font-medium">25%</span> of your credit score
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Goals grid */}
+          <h2 className="text-xl font-bold mb-4">Savings <span className="text-gradient">Goals</span></h2>
+          <div className="grid md:grid-cols-2 gap-4">
+            {savingsGoals.map((goal, i) => (
+              <GoalCard key={goal.id} goal={goal} index={i} />
+            ))}
+          </div>
+        </>
+      )}
     </div>
   )
 }

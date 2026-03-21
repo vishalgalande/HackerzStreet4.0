@@ -83,7 +83,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
     >
       <div className="flex items-center justify-between mb-5">
         <h3 className="text-lg font-semibold flex items-center gap-2">
-          <span className="text-[var(--color-gold)]">◎</span>
+          <span className="text-teal-400">◎</span>
           Log Daily Entry
         </h3>
         <motion.button
@@ -156,7 +156,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
               className="w-10 h-6 rounded-full transition-all"
               style={{
                 background: formData.bill_paid_on_time
-                  ? 'linear-gradient(135deg, var(--color-burnt-orange), var(--color-gold))'
+                  ? 'var(--color-teal)'
                   : 'var(--color-bg-elevated)',
                 border: `1px solid ${formData.bill_paid_on_time ? 'transparent' : 'var(--color-border)'}`,
               }}
