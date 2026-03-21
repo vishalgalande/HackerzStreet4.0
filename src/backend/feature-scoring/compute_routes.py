@@ -26,6 +26,7 @@ from models import UserInput, BillPaymentBehavior, EmploymentType, RentHistory
 from scoring import compute_score, get_band, compute_confidence_margin, compute_benchmark_percentile
 from explainability import compute_factor_contributions, get_positive_factors, get_negative_factors, generate_summary
 from recommendations import generate_recommendations
+from risk_model import compute_full_risk_assessment
 
 router = APIRouter(prefix="/api")
 
@@ -99,6 +100,7 @@ class ComputeScoreResponse(BaseModel):
     summary: str
     summary_hi: str
     data_quality: dict
+    risk_assessment: dict
 
 
 # ── Aggregation helpers ──
@@ -235,7 +237,10 @@ async def compute_unified_score(req: ComputeScoreRequest):
     # Step 6: Recommendations
     recs = generate_recommendations(user_input, factor_scores)
 
-    # Step 7: Data quality indicator
+    # Step 7: Risk Assessment
+    risk_assessment = compute_full_risk_assessment(user_input, score, factor_scores)
+
+    # Step 8: Data quality indicator
     data_quality = {
         "entry_count": agg["entry_count"],
         "has_profile": monthly_income > 0,
@@ -263,4 +268,5 @@ async def compute_unified_score(req: ComputeScoreRequest):
         summary=summary_en,
         summary_hi=summary_hi,
         data_quality=data_quality,
+        risk_assessment=risk_assessment,
     )

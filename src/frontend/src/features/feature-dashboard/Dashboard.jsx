@@ -17,6 +17,7 @@ import ScoreGauge from '../feature-scoring/ScoreGauge'
 import FactorWaterfall from '../feature-scoring/FactorWaterfall'
 import Recommendations from '../feature-scoring/Recommendations'
 import WhatIfSimulator from '../feature-scoring/WhatIfSimulator'
+import RiskAssessment from '../feature-scoring/RiskAssessment'
 import { computeScore, getBand } from '../feature-scoring/scorer'
 
 const ENTRIES_KEY = 'hackerzstreet_entries'
@@ -342,17 +343,18 @@ export default function Dashboard() {
       })
       if (res.ok) {
         const data = await res.json()
-        setBackendScore({
-          score: data.score,
-          band: data.band,
-          color: data.band_color,
-          factors: data.factors.reduce((acc, f) => ({ ...acc, [f.factor]: 50 + (f.points / 600 * 100 / (({ payment_consistency: 0.30, savings_ratio: 0.25, income_stability: 0.20, spending_discipline: 0.15, debt_to_income: 0.10 })[f.factor] || 0.2)) }), {}),
-          factors_list: data.factors,
-          recommendations: data.recommendations,
-          data_quality: data.data_quality,
-          summary: data.summary,
-          summary_hi: data.summary_hi,
-        })
+          setBackendScore({
+            score: data.score,
+            band: data.band,
+            color: data.band_color,
+            factors: data.factors.reduce((acc, f) => ({ ...acc, [f.factor]: 50 + (f.points / 600 * 100 / (({ payment_consistency: 0.30, savings_ratio: 0.25, income_stability: 0.20, spending_discipline: 0.15, debt_to_income: 0.10 })[f.factor] || 0.2)) }), {}),
+            factors_list: data.factors,
+            recommendations: data.recommendations,
+            risk_assessment: data.risk_assessment,
+            data_quality: data.data_quality,
+            summary: data.summary,
+            summary_hi: data.summary_hi,
+          })
         // Save to history
         const newHistory = [...scoreHistory, data.score].slice(-12)
         setScoreHistory(newHistory)
@@ -578,6 +580,13 @@ export default function Dashboard() {
         <FactorWaterfall factors={factorContributions} language={language} />
         <Recommendations recommendations={recommendations} language={language} />
       </div>
+
+      {/* ===== RISK ASSESSMENT ===== */}
+      {backendScore?.risk_assessment && (
+        <div className="mb-8">
+          <RiskAssessment riskData={backendScore.risk_assessment} language={language} />
+        </div>
+      )}
 
       {/* ===== WHAT-IF SIMULATOR ===== */}
       <WhatIfSimulator originalInput={profileData} originalScore={scoreResult.score} />

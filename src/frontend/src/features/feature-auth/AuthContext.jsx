@@ -99,17 +99,25 @@ export function AuthProvider({ children }) {
         const data = await response.json()
         setProfile(data.profile)
         setAuthState('authenticated')
-      } else if (response.status === 404) {
-        setAuthState('authenticated_no_profile')
       } else {
-        // Backend error — check localStorage as fallback
-        if (!loadStoredProfile()) {
+        // Backend returned 404 or error — only go to profile setup
+        // if localStorage doesn't have a profile either
+        const stored = loadStoredProfile()
+        if (stored) {
+          // localStorage has profile — keep using it, ignore backend 404
+          setProfileState(stored)
+          setAuthState('authenticated')
+        } else {
           setAuthState('authenticated_no_profile')
         }
       }
     } catch {
       // Backend not running — check localStorage
-      if (!loadStoredProfile()) {
+      const stored = loadStoredProfile()
+      if (stored) {
+        setProfileState(stored)
+        setAuthState('authenticated')
+      } else {
         setAuthState('authenticated_no_profile')
       }
     } finally {
