@@ -43,7 +43,8 @@ export default function ChatBubble({ scoreResult, language = 'en' }) {
 
     try {
       const token = getToken()
-      const res = await fetch('/api/chat', {
+      const API = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${API}/api/chat`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

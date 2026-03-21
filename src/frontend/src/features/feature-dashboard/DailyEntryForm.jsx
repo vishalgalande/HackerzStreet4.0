@@ -36,7 +36,8 @@ export default function DailyEntryForm({ onSave, onCancel }) {
 
     try {
       const token = getToken()
-      const response = await fetch('/api/entries', {
+      const API = import.meta.env.VITE_API_URL || ''
+      const response = await fetch(`${API}/api/entries`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

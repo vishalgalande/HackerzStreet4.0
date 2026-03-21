@@ -213,7 +213,8 @@ export default function Dashboard() {
   useEffect(() => {
     const token = getToken()
     if (!token) return
-    fetch('/api/entries?days=30', {
+    const API = import.meta.env.VITE_API_URL || ''
+    fetch(`${API}/api/entries?days=30`, {
       headers: { 'Authorization': `Bearer ${token}` }
     }).then(r => r.ok ? r.json() : []).then(backendEntries => {
       const localEntries = loadEntries()
@@ -310,7 +311,8 @@ export default function Dashboard() {
     saveEntries(updated)
     // Fire-and-forget to backend
     const token = getToken()
-    fetch('/api/entries', {
+    const API = import.meta.env.VITE_API_URL || ''
+    fetch(`${API}/api/entries`, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
       body: JSON.stringify(newEntry),
@@ -337,7 +339,8 @@ export default function Dashboard() {
           savings: e.savings || 0, bill_paid_on_time: e.bill_paid_on_time !== false,
         })),
       }
-      const res = await fetch('/api/compute-score', {
+      const API = import.meta.env.VITE_API_URL || ''
+      const res = await fetch(`${API}/api/compute-score`, {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
