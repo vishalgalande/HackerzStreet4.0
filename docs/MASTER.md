@@ -10,6 +10,11 @@
 | Document | Description |
 |----------|-------------|
 | [README](../README.md) | Project overview & quick start |
+| [PRD](./PRD.md) | Product Requirements Document v2 |
+| [FEATURE_BREAKDOWN](./FEATURE_BREAKDOWN.md) | Conflict-free feature assignments for 3 teammates |
+| [DATA_STORAGE](./DATA_STORAGE.md) | Database schema, tables, RLS policies |
+| [AUTH_GUIDE](./AUTH_GUIDE.md) | How Supabase Auth works (frontend + backend) |
+| [API_CONTRACTS](./API_CONTRACTS.md) | All API endpoints, request/response formats, mock data |
 | [CHANGELOG](./CHANGELOG.md) | Log of all changes per branch/teammate |
 | [CONTRIBUTING](./CONTRIBUTING.md) | Branch strategy, workflow, PR process |
 | [CROSS_PLATFORM](./CROSS_PLATFORM.md) | Mac ↔ Windows compatibility guide |
@@ -20,19 +25,13 @@
 ## 🚀 Feature Docs
 
 > Each feature gets its own file in `docs/features/`.
-> Use the [Feature Template](./features/_TEMPLATE.md) to create new ones.
+> See [Feature Breakdown](./FEATURE_BREAKDOWN.md) for the full assignment map.
 
-| Feature | Owner | Status |
-|---------|-------|--------|
-| *No features added yet — use the template to add one!* | — | — |
-
-<!-- 
-HOW TO ADD A NEW FEATURE:
-1. Copy docs/features/_TEMPLATE.md → docs/features/feature-<name>.md
-2. Fill in the sections
-3. Add a row to the table above
-4. Commit with message: "docs: add feature doc for <name>"
--->
+| Feature | Owner | Branch | Status |
+|---------|-------|--------|--------|
+| [Credit Scoring Engine + Score UI](./features/feature-scoring.md) | Teammate 1 | `feature/scoring` | 🟡 Not Started |
+| [Authentication + User Onboarding](./features/feature-auth.md) | Teammate 2 | `feature/auth` | 🟡 Not Started |
+| [Dashboard + Daily Tracking](./features/feature-dashboard.md) | Teammate 3 | `feature/dashboard` | 🟡 Not Started |
 
 ---
 
