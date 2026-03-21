@@ -85,14 +85,14 @@ function InvestmentCard({ investment, index }) {
       initial={{ opacity: 0, y: 30 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.1, ease: [0.4, 0, 0.2, 1] }}
-      className="glass-card rounded-xl p-6 card-tilt"
+      className="glass-card rounded-2xl p-7 card-tilt"
     >
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{investment.icon}</span>
+      <div className="flex items-start justify-between mb-5">
+        <div className="flex items-center gap-4">
+          <span className="text-3xl">{investment.icon}</span>
           <div>
-            <h3 className="font-semibold">{investment.name}</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full" style={{
+            <h3 className="font-semibold text-[17px]">{investment.name}</h3>
+            <span className="text-[13px] px-2.5 py-1 rounded-full" style={{
               background: `${riskColors[investment.risk]}15`,
               color: riskColors[investment.risk],
             }}>
@@ -101,17 +101,17 @@ function InvestmentCard({ investment, index }) {
           </div>
         </div>
         <div className="text-right">
-          <p className="text-lg font-bold" style={{ color: investment.color }}>{investment.returnRange}</p>
-          <p className="text-xs text-[var(--color-text-muted)]">annual return</p>
+          <p className="text-xl font-bold" style={{ color: investment.color }}>{investment.returnRange}</p>
+          <p className="text-[13px] text-[var(--color-text-muted)]">annual return</p>
         </div>
       </div>
 
-      <p className="text-sm text-[var(--color-text-secondary)] mb-4">{investment.description}</p>
+      <p className="text-[15px] text-[var(--color-text-secondary)] mb-5 leading-relaxed">{investment.description}</p>
 
       {/* Return projection mini chart */}
-      <div className="mb-4">
-        <p className="text-xs text-[var(--color-text-muted)] mb-2">Projected Growth (5 years)</p>
-        <div className="flex items-end gap-1 h-12">
+      <div className="mb-5">
+        <p className="text-[13px] text-[var(--color-text-muted)] mb-3">Projected Growth (5 years)</p>
+        <div className="flex items-end gap-1.5 h-14">
           {investment.projected.map((val, i) => {
             const max = Math.max(...investment.projected)
             const height = (val / max) * 100
@@ -129,23 +129,23 @@ function InvestmentCard({ investment, index }) {
             )
           })}
         </div>
-        <div className="flex justify-between mt-1">
-          <span className="text-[10px] text-[var(--color-text-muted)]">Year 1</span>
-          <span className="text-[10px] text-[var(--color-text-muted)]">Year 5</span>
+        <div className="flex justify-between mt-2">
+          <span className="text-[12px] text-[var(--color-text-muted)]">Year 1</span>
+          <span className="text-[12px] text-[var(--color-text-muted)]">Year 5</span>
         </div>
       </div>
 
-      <div className="flex items-center justify-between pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
+      <div className="flex items-center justify-between pt-4" style={{ borderTop: '1px solid var(--color-border)' }}>
         <div>
-          <p className="text-xs text-[var(--color-text-muted)]">Min. Investment</p>
-          <p className="text-sm font-medium">{investment.minAmount}</p>
+          <p className="text-[13px] text-[var(--color-text-muted)]">Min. Investment</p>
+          <p className="text-[15px] font-medium">{investment.minAmount}</p>
         </div>
         <div>
-          <p className="text-xs text-[var(--color-text-muted)]">Duration</p>
-          <p className="text-sm font-medium">{investment.duration}</p>
+          <p className="text-[13px] text-[var(--color-text-muted)]">Duration</p>
+          <p className="text-[15px] font-medium">{investment.duration}</p>
         </div>
         <motion.button
-          className="btn-primary text-sm py-2 px-4"
+          className="btn-primary text-[15px] py-2.5 px-5"
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -158,27 +158,27 @@ function InvestmentCard({ investment, index }) {
 
 export default function InvestmentsPage() {
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-5xl mx-auto">
+    <div className="page-container pb-16">
       {/* Header */}
       <motion.div
-        className="text-center mb-12"
+        className="text-center mb-14"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
+        <span className="inline-block px-5 py-2 rounded-full glass-warm text-[13px] font-medium text-[var(--color-gold)] mb-5">
           △ SMART INVESTMENTS
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
           Grow Your <span className="text-gradient">Wealth</span>
         </h1>
-        <p className="text-[var(--color-text-secondary)] max-w-xl mx-auto">
+        <p className="text-[16px] text-[var(--color-text-secondary)] max-w-xl mx-auto leading-relaxed">
           Investment options curated for your risk profile. Building wealth also builds your credit score.
         </p>
       </motion.div>
 
       {/* Investment grid */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid md:grid-cols-2 gap-8">
         {investments.map((inv, i) => (
           <InvestmentCard key={inv.id} investment={inv} index={i} />
         ))}
@@ -186,13 +186,13 @@ export default function InvestmentsPage() {
 
       {/* Bottom insight */}
       <motion.div
-        className="mt-12 glass-card rounded-2xl p-6 text-center"
+        className="mt-14 glass-card rounded-2xl p-8 text-center"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         transition={{ duration: 0.6 }}
         viewport={{ once: true }}
       >
-        <p className="text-sm text-[var(--color-text-secondary)]">
+        <p className="text-[15px] text-[var(--color-text-secondary)] leading-relaxed">
           💡 <span className="text-[var(--color-gold)] font-medium">Pro tip:</span> Regular investments through SIP or RD mode improve your
           Savings Discipline factor — worth 25% of your credit score.
         </p>

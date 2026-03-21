@@ -39,14 +39,14 @@ function GoalCard({ goal, index }) {
       initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="glass-card rounded-xl p-5"
+      className="glass-card rounded-2xl p-6"
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{goal.icon}</span>
-          <h4 className="font-semibold text-sm">{goal.name}</h4>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">{goal.icon}</span>
+          <h4 className="font-semibold text-[16px]">{goal.name}</h4>
         </div>
-        <span className="text-sm font-bold" style={{ color: goal.color }}>{percent}%</span>
+        <span className="text-[15px] font-bold" style={{ color: goal.color }}>{percent}%</span>
       </div>
 
       {/* Progress bar */}
@@ -60,11 +60,11 @@ function GoalCard({ goal, index }) {
         />
       </div>
 
-      <div className="flex justify-between mt-2">
-        <span className="text-xs text-[var(--color-text-muted)]">
+      <div className="flex justify-between mt-3">
+        <span className="text-[14px] text-[var(--color-text-muted)]">
           ₹<AnimatedNumber target={goal.current} />
         </span>
-        <span className="text-xs text-[var(--color-text-muted)]">₹{goal.target.toLocaleString()}</span>
+        <span className="text-[14px] text-[var(--color-text-muted)]">₹{goal.target.toLocaleString()}</span>
       </div>
     </motion.div>
   )
@@ -154,33 +154,33 @@ export default function SavingsPage() {
   const overallPercent = Math.round((totalSaved / totalTarget) * 100)
 
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-4xl mx-auto">
+    <div className="page-container pb-16" style={{ maxWidth: '960px' }}>
       {/* Header */}
       <motion.div
-        className="text-center mb-8"
+        className="text-center mb-10"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
       >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
+        <span className="inline-block px-5 py-2 rounded-full glass-warm text-[13px] font-medium text-[var(--color-gold)] mb-5">
           ◇ SAVINGS TRACKER
         </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-3">
+        <h1 className="text-3xl md:text-4xl font-bold mb-4">
           Your <span className="text-gradient">Savings Journey</span>
         </h1>
-        <p className="text-[var(--color-text-secondary)]">
+        <p className="text-[16px] text-[var(--color-text-secondary)] leading-relaxed">
           Building savings builds your credit score — every rupee counts.
         </p>
       </motion.div>
 
       {savingsGoals.length === 0 ? (
-        <div className="glass-card rounded-2xl p-12 text-center mt-8">
-          <span className="text-4xl mb-4 block opacity-50">🎯</span>
-          <h3 className="text-xl font-semibold mb-2">No active savings goals</h3>
-          <p className="text-[var(--color-text-secondary)] text-sm mb-6 max-w-sm mx-auto">
+        <div className="glass-card rounded-2xl p-14 text-center mt-8">
+          <span className="text-5xl mb-6 block opacity-50">🎯</span>
+          <h3 className="text-2xl font-semibold mb-3">No active savings goals</h3>
+          <p className="text-[var(--color-text-secondary)] text-[15px] mb-8 max-w-sm mx-auto leading-relaxed">
             You haven't set up any savings goals yet. Creating a goal and contributing to it regularly helps build a strong credit profile.
           </p>
-          <button className="btn-primary">
+          <button className="btn-primary text-[15px] px-8 py-3">
             + Create your first goal
           </button>
         </div>
@@ -191,11 +191,11 @@ export default function SavingsPage() {
             <div className="grid md:grid-cols-2 gap-8 items-center">
               <PiggyBank fillPercent={overallPercent} />
               <div className="text-center md:text-left">
-                <p className="text-sm text-[var(--color-text-muted)] mb-1">Total Saved</p>
-                <p className="text-4xl font-bold text-gradient mb-2">
+                <p className="text-[14px] text-[var(--color-text-muted)] mb-1.5">Total Saved</p>
+                <p className="text-4xl font-bold text-gradient mb-3">
                   ₹<AnimatedNumber target={totalSaved} />
                 </p>
-                <p className="text-sm text-[var(--color-text-secondary)] mb-4">
+                <p className="text-[15px] text-[var(--color-text-secondary)] mb-5">
                   of ₹{totalTarget.toLocaleString()} goal ({overallPercent || 0}%)
                 </p>
 
@@ -210,7 +210,7 @@ export default function SavingsPage() {
                   />
                 </div>
 
-                <p className="text-xs text-[var(--color-text-muted)] mt-3">
+                <p className="text-[14px] text-[var(--color-text-muted)] mt-4">
                   💡 Savings discipline is worth <span className="text-teal-400 font-medium">25%</span> of your credit score
                 </p>
               </div>
@@ -218,8 +218,8 @@ export default function SavingsPage() {
           </div>
 
           {/* Goals grid */}
-          <h2 className="text-xl font-bold mb-4">Savings <span className="text-gradient">Goals</span></h2>
-          <div className="grid md:grid-cols-2 gap-4">
+          <h2 className="text-2xl font-bold mb-6">Savings <span className="text-gradient">Goals</span></h2>
+          <div className="grid md:grid-cols-2 gap-6">
             {savingsGoals.map((goal, i) => (
               <GoalCard key={goal.id} goal={goal} index={i} />
             ))}

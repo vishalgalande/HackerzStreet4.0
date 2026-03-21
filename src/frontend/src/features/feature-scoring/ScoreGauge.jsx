@@ -42,7 +42,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
   return (
     <div className="flex flex-col items-center">
       {/* SVG Gauge */}
-      <div className={`relative ${isLarge ? 'w-72 h-40' : 'w-56 h-32'}`}>
+      <div className={`relative ${isLarge ? 'w-80 h-48' : 'w-60 h-36'}`}>
         <svg viewBox="0 0 200 115" className="w-full h-full">
           <defs>
             {/* Glow filter */}
@@ -112,7 +112,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
 
       {/* Band label */}
       <motion.div
-        className="mt-4 px-4 py-1 rounded-full text-xs font-semibold tracking-wide"
+        className="mt-5 px-5 py-1.5 rounded-full text-[14px] font-semibold tracking-wide"
         style={{
           backgroundColor: `${gaugeColor}15`,
           color: gaugeColor,
@@ -126,7 +126,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
       </motion.div>
 
       {/* Confidence + Benchmark - System Labels */}
-      <div className="flex gap-6 mt-5 text-xs font-semibold tracking-widest text-slate-400 uppercase">
+      <div className="flex gap-8 mt-6 system-label">
         {confidenceMargin && (
           <span>Confidence: ±{confidenceMargin} pts</span>
         )}

@@ -73,18 +73,18 @@ export default function QuickStats({ entries, profile }) {
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
       {stats.map((stat, i) => (
         <motion.div
           key={stat.label}
-          className="glass-card rounded-xl p-4 card-tilt"
+          className="glass-card rounded-2xl p-5 card-tilt"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: i * 0.08 }}
         >
-          <span className="text-lg" style={{ color: stat.color }}>{stat.icon}</span>
-          <p className="text-xs text-[var(--color-text-muted)] mt-2">{stat.label}</p>
-          <p className="text-xl font-bold mt-1" style={{ color: stat.color }}>
+          <span className="text-2xl" style={{ color: stat.color }}>{stat.icon}</span>
+          <p className="text-[13px] text-[var(--color-text-muted)] mt-3">{stat.label}</p>
+          <p className="text-2xl font-bold mt-1.5" style={{ color: stat.color }}>
             {stat.value}
           </p>
         </motion.div>
