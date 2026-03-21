@@ -1,177 +1,209 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { getApplications, updateApplicationStatus } from './loanApi';
+/**
+ * LenderDashboard — Read-only view of ongoing loans from Supabase.
+ * Shows loan portfolio stats + individual loan cards.
+ * No approve/reject — purely analytical.
+ */
+
+import { useState, useEffect } from 'react'
+import { motion } from 'framer-motion'
+import { useAuth } from '../feature-auth/AuthContext'
+
+const statusConfig = {
+  active: { label: 'Active', color: 'text-emerald-400', bg: 'bg-emerald-400/10', border: 'border-emerald-400/20', dot: 'bg-emerald-400' },
+  overdue: { label: 'Overdue', color: 'text-rose-400', bg: 'bg-rose-400/10', border: 'border-rose-400/20', dot: 'bg-rose-400' },
+  completed: { label: 'Completed', color: 'text-neutral-400', bg: 'bg-neutral-400/10', border: 'border-neutral-400/20', dot: 'bg-neutral-400' },
+  defaulted: { label: 'Defaulted', color: 'text-red-500', bg: 'bg-red-500/10', border: 'border-red-500/20', dot: 'bg-red-500' },
+}
 
 export default function LenderDashboard() {
-  const [applications, setApplications] = useState([]);
-  const [selectedApp, setSelectedApp] = useState(null);
+  const { getToken } = useAuth()
+  const [loans, setLoans] = useState([])
+  const [stats, setStats] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [filter, setFilter] = useState('all') // all, active, overdue, completed
 
   useEffect(() => {
-    setApplications(getApplications());
-  }, []);
+    fetchData()
+  }, [])
 
-  const handleStatusUpdate = (id, status) => {
-    const updated = updateApplicationStatus(id, status);
-    setApplications(updated);
-    setSelectedApp(null);
-  };
+  async function fetchData() {
+    setLoading(true)
+    const token = getToken()
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {}
 
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'approved': return 'text-green-400 bg-green-400/10 border-green-400/20';
-      case 'rejected': return 'text-red-400 bg-red-400/10 border-red-400/20';
-      default: return 'text-[var(--color-gold)] bg-[var(--color-gold)]/10 border-[var(--color-gold)]/20';
+    try {
+      const [loansRes, statsRes] = await Promise.all([
+        fetch('/api/loans', { headers }),
+        fetch('/api/loans/stats', { headers }),
+      ])
+
+      if (loansRes.ok) {
+        const data = await loansRes.json()
+        setLoans(data.loans || [])
+      }
+      if (statsRes.ok) {
+        const data = await statsRes.json()
+        setStats(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch loans:', err)
+    } finally {
+      setLoading(false)
     }
-  };
+  }
+
+  const filteredLoans = filter === 'all'
+    ? loans
+    : loans.filter(l => l.status === filter)
+
+  const formatCurrency = (amt) => `₹${Number(amt || 0).toLocaleString('en-IN')}`
+  const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '—'
 
   return (
-    <div className="pt-24 pb-12 px-4 max-w-7xl mx-auto min-h-screen">
-      <div className="mb-8 flex items-end justify-between">
-        <div>
-          <h1 className="text-3xl font-light text-gradient mb-2">Lender Dashboard</h1>
-          <p className="text-[var(--color-text-secondary)]">Review and manage loan applications.</p>
-        </div>
-      </div>
+    <main className="w-full min-h-screen bg-neutral-950 flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 flex flex-col gap-8">
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Applications List */}
-        <div className="lg:col-span-1 space-y-4 max-h-[80vh] overflow-y-auto pr-2 custom-scrollbar">
-          {applications.map((app) => (
-            <motion.div
-              key={app.id}
-              whileHover={{ scale: 1.02 }}
-              onClick={() => setSelectedApp(app)}
-              className={`glass-card p-4 cursor-pointer transition-all duration-300 ${
-                selectedApp?.id === app.id
-                  ? 'border-[var(--color-gold)] shadow-[0_0_15px_rgba(212,168,67,0.15)] bg-[rgba(212,168,67,0.05)]'
-                  : 'hover:border-[rgba(255,255,255,0.1)]'
+        {/* Header */}
+        <div>
+          <h1 className="text-3xl font-semibold text-neutral-50 tracking-tight">Active Loans</h1>
+          <p className="text-neutral-400 mt-1">Portfolio overview — all ongoing loan disbursements</p>
+        </div>
+
+        {/* Stats Cards */}
+        {stats && stats.total_loans > 0 && (
+          <div className="w-full grid grid-cols-2 md:grid-cols-4 gap-4">
+            {[
+              { label: 'Total Disbursed', value: formatCurrency(stats.total_disbursed), icon: '💰' },
+              { label: 'Active Loans', value: stats.active, icon: '✅', accent: 'text-emerald-400' },
+              { label: 'Overdue', value: stats.overdue, icon: '⚠️', accent: 'text-rose-400' },
+              { label: 'Monthly EMI', value: formatCurrency(stats.monthly_emi_collection), icon: '📅' },
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.4, delay: i * 0.08 }}
+                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-5 shadow-xl"
+              >
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-lg">{stat.icon}</span>
+                  <span className="text-xs text-neutral-500 uppercase tracking-widest">{stat.label}</span>
+                </div>
+                <p className={`text-2xl font-bold tabular-nums ${stat.accent || 'text-neutral-50'}`}>
+                  {stat.value}
+                </p>
+              </motion.div>
+            ))}
+          </div>
+        )}
+
+        {/* Filter Tabs */}
+        <div className="flex gap-1 p-1 rounded-xl bg-neutral-900 border border-neutral-800 w-fit">
+          {[
+            { id: 'all', label: 'All' },
+            { id: 'active', label: 'Active' },
+            { id: 'overdue', label: 'Overdue' },
+            { id: 'completed', label: 'Completed' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setFilter(tab.id)}
+              className={`px-5 py-2 rounded-lg text-sm font-medium transition-all ${
+                filter === tab.id
+                  ? 'bg-neutral-800 text-white shadow-sm'
+                  : 'text-neutral-500 hover:text-neutral-300'
               }`}
             >
-              <div className="flex justify-between items-start mb-2">
-                <div>
-                  <h3 className="font-medium text-[var(--color-text-primary)]">{app.applicantName}</h3>
-                  <p className="text-sm text-[var(--color-text-secondary)]">{app.id}</p>
-                </div>
-                <span className={`text-xs px-2 py-1 rounded-full border border-current ${getStatusColor(app.status)} capitalize`}>
-                  {app.status}
-                </span>
-              </div>
-              <div className="flex justify-between text-sm mt-4 pt-4 border-t border-[rgba(255,255,255,0.05)]">
-                <span className="text-[var(--color-text-secondary)] capitalize">{app.type} Data</span>
-                <span className="font-medium text-[var(--color-gold)]">${app.requestedAmount?.toLocaleString()}</span>
-              </div>
-            </motion.div>
+              {tab.label}
+            </button>
           ))}
-          {applications.length === 0 && (
-            <div className="text-center text-[var(--color-text-secondary)] py-8">
-              No applications found.
+        </div>
+
+        {/* Loans List */}
+        {loading ? (
+          <div className="flex items-center justify-center py-20">
+            <div className="w-8 h-8 border-2 border-neutral-700 border-t-emerald-400 rounded-full animate-spin" />
+          </div>
+        ) : filteredLoans.length === 0 ? (
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl p-12 text-center">
+            <p className="text-4xl mb-3 opacity-50">🏦</p>
+            <p className="text-neutral-400">
+              {loans.length === 0 ? 'No loans found in the database' : `No ${filter} loans`}
+            </p>
+          </div>
+        ) : (
+          <div className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl shadow-xl overflow-hidden">
+            {/* Table Header */}
+            <div className="hidden md:grid grid-cols-7 gap-4 px-6 py-3 border-b border-neutral-800 text-[10px] text-neutral-500 uppercase tracking-widest">
+              <span>Borrower</span>
+              <span>Purpose</span>
+              <span className="text-right">Amount</span>
+              <span className="text-right">EMI</span>
+              <span className="text-center">Rate</span>
+              <span className="text-center">Status</span>
+              <span className="text-right">Next Due</span>
             </div>
-          )}
-        </div>
 
-        {/* Detail View */}
-        <div className="lg:col-span-2">
-          <AnimatePresence mode="wait">
-            {selectedApp ? (
-              <motion.div
-                key={selectedApp.id}
-                initial={{ opacity: 0, x: 20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: -20 }}
-                className="glass-panel p-8"
-              >
-                <div className="flex justify-between items-start mb-8 pb-6 border-b border-[rgba(255,255,255,0.05)]">
+            {/* Rows */}
+            {filteredLoans.map((loan, i) => {
+              const sc = statusConfig[loan.status] || statusConfig.active
+              return (
+                <motion.div
+                  key={loan.id || i}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.3, delay: i * 0.05 }}
+                  className={`grid grid-cols-1 md:grid-cols-7 gap-2 md:gap-4 px-6 py-4 items-center ${
+                    i < filteredLoans.length - 1 ? 'border-b border-neutral-800/50' : ''
+                  } hover:bg-neutral-800/30 transition-colors`}
+                >
+                  {/* Borrower */}
                   <div>
-                    <h2 className="text-2xl font-light text-[var(--color-text-primary)] mb-1">{selectedApp.applicantName}</h2>
-                    <p className="text-[var(--color-text-secondary)] flex gap-4">
-                      <span>{selectedApp.id}</span>
-                      <span>Applied: {new Date(selectedApp.dateApplied).toLocaleDateString()}</span>
-                    </p>
+                    <p className="text-neutral-50 font-medium text-sm">{loan.borrower_name}</p>
+                    <p className="text-neutral-500 text-xs">{loan.borrower_email || '—'}</p>
                   </div>
+
+                  {/* Purpose */}
+                  <div className="text-neutral-400 text-sm truncate" title={loan.purpose}>
+                    {loan.purpose || '—'}
+                  </div>
+
+                  {/* Amount */}
                   <div className="text-right">
-                    <p className="text-sm text-[var(--color-text-secondary)] mb-1">Requested Amount</p>
-                    <p className="text-3xl font-light text-[var(--color-gold)]">${selectedApp.requestedAmount?.toLocaleString()}</p>
+                    <p className="text-neutral-50 font-medium tabular-nums text-sm">{formatCurrency(loan.amount)}</p>
+                    <p className="text-neutral-500 text-xs">{loan.tenure_months}mo tenure</p>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-2 gap-8 mb-8">
-                  {selectedApp.type === 'traditional' ? (
-                    <>
-                      <div>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Credit Score</p>
-                        <p className={`text-xl font-medium ${selectedApp.creditScore >= 700 ? 'text-green-400' : 'text-yellow-400'}`}>{selectedApp.creditScore}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Annual Salary</p>
-                        <p className="text-xl">${selectedApp.salary?.toLocaleString()}</p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Due / Paid Loans</p>
-                        <p className="text-xl">
-                          <span className="text-red-400">${selectedApp.dueLoans?.toLocaleString()}</span> / <span className="text-green-400">${selectedApp.paidLoans?.toLocaleString()}</span>
-                        </p>
-                      </div>
-                      <div>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Properties Value</p>
-                        <p className="text-xl">${selectedApp.propertiesValue?.toLocaleString()}</p>
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div className="col-span-2">
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Alternative Evaluation Focus</p>
-                        <div className="flex items-center gap-2 mb-4">
-                           <span className="w-2 h-2 rounded-full bg-[var(--color-gold)]"></span>
-                           <span>UPI Transaction History & Lifestyle</span>
-                        </div>
-                      </div>
-                      <div>
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">UPI Monthly Avg (eqv)</p>
-                        <p className="text-xl text-green-400">${selectedApp.upiMonthlyAvg?.toLocaleString()}</p>
-                      </div>
-                      <div className="col-span-2">
-                        <p className="text-sm text-[var(--color-text-secondary)] mb-1">Daily Lifestyle Insights</p>
-                        <div className="p-4 rounded-lg bg-[rgba(255,255,255,0.02)] border border-[rgba(255,255,255,0.05)] text-[var(--color-text-secondary)] leading-relaxed">
-                          {selectedApp.lifestyle}
-                        </div>
-                      </div>
-                    </>
-                  )}
-                </div>
+                  {/* EMI */}
+                  <p className="text-right text-neutral-300 tabular-nums text-sm">
+                    {formatCurrency(loan.emi)}/mo
+                  </p>
 
-                {selectedApp.status === 'pending' && (
-                  <div className="flex gap-4 pt-6 border-t border-[rgba(255,255,255,0.05)]">
-                    <button
-                      onClick={() => handleStatusUpdate(selectedApp.id, 'approved')}
-                      className="flex-1 py-3 rounded-lg bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20 transition-colors"
-                    >
-                      Approve Loan
-                    </button>
-                    <button
-                      onClick={() => handleStatusUpdate(selectedApp.id, 'rejected')}
-                      className="flex-1 py-3 rounded-lg bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 transition-colors"
-                    >
-                      Reject Application
-                    </button>
+                  {/* Interest Rate */}
+                  <p className="text-center text-neutral-400 font-mono text-sm">
+                    {loan.interest_rate}%
+                  </p>
+
+                  {/* Status */}
+                  <div className="flex justify-center">
+                    <span className={`inline-flex items-center gap-1.5 text-xs px-3 py-1 rounded-full border ${sc.color} ${sc.bg} ${sc.border}`}>
+                      <span className={`w-1.5 h-1.5 rounded-full ${sc.dot}`} />
+                      {sc.label}
+                    </span>
                   </div>
-                )}
-                {selectedApp.status !== 'pending' && (
-                  <div className={`p-4 rounded-lg text-center ${getStatusColor(selectedApp.status)}`}>
-                    This application has been <strong>{selectedApp.status}</strong>.
-                  </div>
-                )}
-              </motion.div>
-            ) : (
-              <div className="h-full flex items-center justify-center text-[var(--color-text-muted)] p-12 glass-panel border-dashed border-[rgba(255,255,255,0.1)]">
-                <div className="text-center">
-                  <div className="text-4xl mb-4 opacity-50">🏦</div>
-                  <p>Select an application to review details</p>
-                </div>
-              </div>
-            )}
-          </AnimatePresence>
-        </div>
+
+                  {/* Next Due */}
+                  <p className={`text-right text-sm tabular-nums ${
+                    loan.status === 'overdue' ? 'text-rose-400 font-medium' : 'text-neutral-400'
+                  }`}>
+                    {formatDate(loan.next_due_date)}
+                  </p>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    </main>
+  )
 }

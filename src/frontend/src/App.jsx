@@ -24,8 +24,7 @@ import AlertsPage from './features/feature-dashboard/AlertsPage'
 import InvestmentsPage from './features/feature-dashboard/InvestmentsPage'
 import SavingsPage from './features/feature-dashboard/SavingsPage'
 import AntiImpulsivity from './features/feature-dashboard/AntiImpulsivity'
-import ChimcharAssistant from './features/feature-ai/ChimcharAssistant'
-import ChimcharFloating from './features/feature-ai/ChimcharFloating'
+import LenderDashboard from './features/feature-loans/LenderDashboard'
 import Navbar from './components/Navbar'
 import ScoreGauge from './features/feature-scoring/ScoreGauge'
 import FactorWaterfall from './features/feature-scoring/FactorWaterfall'
@@ -45,7 +44,7 @@ function PageRenderer({ page }) {
     <AnimatePresence mode="wait">
       <motion.div key={page} {...pageTransition}>
         {page === 'dashboard' && <Dashboard />}
-        {page === 'chimchar' && <ChimcharAssistant />}
+        {page === 'lender-dashboard' && <LenderDashboard />}
         {page === 'credit-engine' && <CreditEngine />}
         {page === 'alerts' && <AlertsPage />}
         {page === 'investments' && <InvestmentsPage />}
@@ -103,16 +102,13 @@ function AppContent() {
 
   if (authState === 'authenticated' || view === 'app') {
     return (
-      <div className="main-container">
+      <div className="min-h-screen">
         <Navbar
           activePage={activePage}
           onNavigate={setActivePage}
           onSignOut={signOut || (() => setView('home'))}
         />
-        <main style={{ paddingTop: '90px' }}>
-          <PageRenderer page={activePage} />
-        </main>
-        <ChimcharFloating />
+        <PageRenderer page={activePage} />
       </div>
     )
   }

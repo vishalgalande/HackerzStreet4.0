@@ -25,6 +25,7 @@ from profile_routes import router as profile_router
 from daily_routes import router as daily_router
 from history_routes import router as history_router
 from email_routes import router as email_router
+from loan_routes import router as loan_router
 
 app = FastAPI(
     title="Alternative Credit Risk Assessment API",
@@ -52,6 +53,7 @@ app.include_router(profile_router)   # /api/profile
 app.include_router(daily_router)     # /api/entries
 app.include_router(history_router)   # /api/score-history
 app.include_router(email_router)     # /api/check-alerts, /api/send-test-email
+app.include_router(loan_router)      # /api/loans, /api/loans/active, /api/loans/stats
 
 
 @app.get("/")
