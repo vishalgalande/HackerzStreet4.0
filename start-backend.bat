@@ -18,7 +18,7 @@ if exist ".venv\Scripts\activate.bat" (
 :: Create venv if it doesn't exist
 if not exist ".venv" (
     echo [1/3] Creating virtual environment...
-    python -m venv .venv
+    py -m venv .venv
     echo      Done.
 ) else (
     echo [1/3] Virtual environment already exists.

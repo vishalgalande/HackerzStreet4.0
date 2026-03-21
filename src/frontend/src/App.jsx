@@ -24,6 +24,8 @@ import AlertsPage from './features/feature-dashboard/AlertsPage'
 import InvestmentsPage from './features/feature-dashboard/InvestmentsPage'
 import SavingsPage from './features/feature-dashboard/SavingsPage'
 import AntiImpulsivity from './features/feature-dashboard/AntiImpulsivity'
+import LoanApply from './features/feature-loans/LoanApply'
+import LenderDashboard from './features/feature-loans/LenderDashboard'
 import Navbar from './components/Navbar'
 import ScoreGauge from './features/feature-scoring/ScoreGauge'
 import FactorWaterfall from './features/feature-scoring/FactorWaterfall'
@@ -43,6 +45,8 @@ function PageRenderer({ page }) {
     <AnimatePresence mode="wait">
       <motion.div key={page} {...pageTransition}>
         {page === 'dashboard' && <Dashboard />}
+        {page === 'loan-apply' && <LoanApply />}
+        {page === 'lender-dashboard' && <LenderDashboard />}
         {page === 'credit-engine' && <CreditEngine />}
         {page === 'alerts' && <AlertsPage />}
         {page === 'investments' && <InvestmentsPage />}
