@@ -48,3 +48,6 @@ yarn-error.log*
 *.orig
 coverage/
 .cache/
+
+# ----- Firebase -----
+.firebase/
