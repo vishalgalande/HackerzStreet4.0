@@ -8,6 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '◎' },
+  { id: 'loan-apply', label: 'Apply Loan', icon: '📝' },
+  { id: 'lender-dashboard', label: 'Lender View', icon: '🏦' },
   { id: 'credit-engine', label: 'Credit Engine', icon: '⚡' },
   { id: 'alerts', label: 'Alerts', icon: '◈' },
   { id: 'investments', label: 'Investments', icon: '△' },
