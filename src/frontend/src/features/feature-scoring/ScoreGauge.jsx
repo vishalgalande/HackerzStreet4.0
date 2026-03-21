@@ -102,7 +102,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
         {/* Score number overlay - Massive, stark, neutral */}
         <div className="absolute inset-0 flex flex-col items-center justify-end pb-3">
           <motion.span
-            className={`font-bold tracking-tight text-[var(--color-text-primary)] ${isLarge ? 'text-7xl' : 'text-5xl'}`}
+            className={`font-bold tracking-tighter tabular-nums text-white ${isLarge ? 'text-7xl' : 'text-5xl'}`}
             key={displayScore}
           >
             {displayScore}
@@ -126,7 +126,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
       </motion.div>
 
       {/* Confidence + Benchmark - System Labels */}
-      <div className="flex gap-6 mt-5 system-label">
+      <div className="flex gap-6 mt-5 text-xs font-semibold tracking-widest text-slate-400 uppercase">
         {confidenceMargin && (
           <span>Confidence: ±{confidenceMargin} pts</span>
         )}

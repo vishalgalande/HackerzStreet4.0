@@ -376,10 +376,11 @@ export default function Dashboard() {
   const totalDebt = profile?.existing_debt || 0
 
   return (
-    <div className="min-h-screen pt-20 pb-16 px-4 md:px-8 max-w-6xl mx-auto">
+    <div className="w-full min-h-screen bg-[#0B0F19] flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 flex flex-col gap-8">
       {/* ===== HERO: Score Gauge ===== */}
       <motion.div
-        className="glass-card rounded-2xl p-8 mb-8 relative overflow-hidden"
+        className="bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl relative overflow-hidden"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -459,11 +460,11 @@ export default function Dashboard() {
           {/* Controls: Occupation + Timeline */}
           <div className="grid sm:grid-cols-2 gap-4 max-w-lg mx-auto">
             <div>
-              <label className="block mb-2 system-label">Occupation</label>
+              <label className="block mb-2 text-xs font-semibold tracking-widest text-slate-400 uppercase">Occupation</label>
               <motion.select
                 value={occupation}
                 onChange={(e) => setOccupation(e.target.value)}
-                className="input-field text-sm"
+                className="w-full appearance-none bg-slate-800/50 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm outline-none focus:ring-2 focus:ring-teal-500 transition-all"
                 whileFocus={{ scale: 1.01 }}
               >
                 {occupations.map(o => (
@@ -472,8 +473,8 @@ export default function Dashboard() {
               </motion.select>
             </div>
             <div>
-              <label className="block mb-2 system-label">Income Timeline</label>
-              <div className="flex gap-1 p-1 rounded-lg bg-[rgba(30,41,59,0.5)]">
+              <label className="block mb-2 text-xs font-semibold tracking-widest text-slate-400 uppercase">Income Timeline</label>
+              <div className="flex gap-1 p-1 rounded-xl bg-slate-800/50 border border-white/10">
                 {timelines.map(t => (
                   <button
                     key={t.value}
@@ -494,7 +495,7 @@ export default function Dashboard() {
       </motion.div>
 
       {/* ===== DASHBOARD TABS ===== */}
-      <div className="flex gap-4 mb-8 p-1 rounded-xl glass w-fit md:mx-auto overflow-x-auto no-scrollbar">
+      <div className="flex gap-1 p-1 rounded-xl bg-slate-900/50 backdrop-blur-xl border border-white/10 w-fit md:mx-auto overflow-x-auto no-scrollbar">
         {[
           { id: 'overview', label: 'Overview', icon: '◎' },
           { id: 'analytics', label: 'Analytics', icon: '◈' },
@@ -505,8 +506,8 @@ export default function Dashboard() {
             onClick={() => setActiveTab(tab.id)}
             className={`flex items-center gap-2 px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${
               activeTab === tab.id
-                ? 'bg-[var(--color-bg-elevated)] text-[var(--color-gold)] shadow-sm'
-                : 'text-[var(--color-text-secondary)] hover:text-white'
+                ? 'bg-slate-800 text-white shadow-sm'
+                : 'text-slate-400 hover:text-slate-200'
             }`}
           >
             <span>{tab.icon}</span>
@@ -518,7 +519,7 @@ export default function Dashboard() {
       {activeTab === 'overview' && (
       <>
       {/* ===== KEY CARDS ===== */}
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
         {[
           {
             title: 'Bills & Loans',
@@ -557,7 +558,7 @@ export default function Dashboard() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: i * 0.1 }}
             viewport={{ once: true }}
-            className="glass-card rounded-xl p-5 card-tilt"
+            className="w-full bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl card-tilt"
           >
             <div className="flex items-center gap-2 mb-4">
               <span className="text-lg" style={{ color: card.color }}>{card.icon}</span>
@@ -581,42 +582,40 @@ export default function Dashboard() {
 
       {activeTab === 'analytics' && (
       <>
-      {/* ===== CHARTS ===== */}
-      <div className="grid md:grid-cols-2 gap-6 mb-8">
+      {/* ===== CHARTS: 50/50 Grid ===== */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
         <motion.div
-          className="glass-card rounded-xl p-5"
+          className="w-full bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col gap-4"
           initial={{ opacity: 0, x: -20 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
         >
-          <h3 className="font-semibold mb-4">Score Trend</h3>
+          <h3 className="text-lg font-semibold text-white tracking-tight">Score Trend</h3>
           <TrendChart data={scoreHistory} />
         </motion.div>
 
         <motion.div
-          className="glass-card rounded-xl p-5"
+          className="w-full bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col gap-4"
           initial={{ opacity: 0, x: 20 }}
           whileInView={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5 }}
           viewport={{ once: true }}
         >
-          <h3 className="font-semibold mb-4">Spending Breakdown</h3>
+          <h3 className="text-lg font-semibold text-white tracking-tight">Spending Breakdown</h3>
           <DonutChart data={spendingBreakdown} />
         </motion.div>
       </div>
 
-      {/* ===== FACTOR BREAKDOWN & RECOMMENDATIONS ===== */}
-      <div className="space-y-6 mb-8">
-        <FactorWaterfall factors={factorContributions} language={language} />
-        <Recommendations recommendations={recommendations} language={language} />
-      </div>
+      {/* ===== FACTOR BREAKDOWN — Full Width ===== */}
+      <FactorWaterfall factors={factorContributions} language={language} />
+
+      {/* ===== RECOMMENDATIONS ===== */}
+      <Recommendations recommendations={recommendations} language={language} />
 
       {/* ===== RISK ASSESSMENT ===== */}
       {backendScore?.risk_assessment && (
-        <div className="mb-8">
-          <RiskAssessment riskData={backendScore.risk_assessment} language={language} />
-        </div>
+        <RiskAssessment riskData={backendScore.risk_assessment} language={language} />
       )}
       </>
       )}
@@ -652,6 +651,7 @@ export default function Dashboard() {
 
       {/* ===== AI CHATBOT ===== */}
       <ChatBubble scoreResult={backendScore} language={language} />
+      </div>
     </div>
   )
 }

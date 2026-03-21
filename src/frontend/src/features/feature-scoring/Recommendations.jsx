@@ -21,14 +21,14 @@ export default function Recommendations({ recommendations, language = 'en' }) {
   return (
     <motion.div
       ref={ref}
-      className="glass-card rounded-xl p-6"
+      className="w-full bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl"
       initial={{ opacity: 0, y: 20 }}
       animate={inView ? { opacity: 1, y: 0 } : {}}
       transition={{ duration: 0.5 }}
     >
       <div className="flex items-center gap-2 mb-5">
-        <span className="text-lg text-[var(--color-gold)]">⚡</span>
-        <h3 className="text-lg font-semibold">
+        <span className="text-lg text-teal-400">⚡</span>
+        <h3 className="text-lg font-semibold text-white tracking-tight">
           {language === 'hi' ? 'सुधार की सिफारिशें' : 'Improvement Recommendations'}
         </h3>
       </div>

@@ -12,6 +12,7 @@ backend_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(backend_dir, "feature-scoring"))
 sys.path.insert(0, os.path.join(backend_dir, "feature-auth"))
 sys.path.insert(0, os.path.join(backend_dir, "feature-dashboard"))
+sys.path.insert(0, os.path.join(backend_dir, "feature-mailing"))
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,6 +24,7 @@ from chat_routes import router as chat_router
 from profile_routes import router as profile_router
 from daily_routes import router as daily_router
 from history_routes import router as history_router
+from email_routes import router as email_router
 
 app = FastAPI(
     title="Alternative Credit Risk Assessment API",
@@ -49,6 +51,7 @@ app.include_router(chat_router)      # /api/chat (AI chatbot)
 app.include_router(profile_router)   # /api/profile
 app.include_router(daily_router)     # /api/entries
 app.include_router(history_router)   # /api/score-history
+app.include_router(email_router)     # /api/check-alerts, /api/send-test-email
 
 
 @app.get("/")
@@ -66,5 +69,7 @@ async def root():
             "POST /api/entries",
             "GET  /api/entries",
             "GET  /api/score-history",
+            "POST /api/check-alerts",
+            "POST /api/send-test-email",
         ],
     }

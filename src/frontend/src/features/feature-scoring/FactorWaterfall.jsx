@@ -1,7 +1,7 @@
 /**
  * Feature: Scoring — FactorWaterfall
- * Custom animated horizontal bars with dark autumn palette
- * Replaced Chart.js with native SVG for draw-in effects
+ * Premium slim horizontal bars with fintech aesthetic.
+ * Teal for positive, rose for negative. Glass card container.
  */
 
 import { useRef } from 'react'
@@ -18,20 +18,20 @@ export default function FactorWaterfall({ factors, language = 'en' }) {
   return (
     <motion.div
       ref={ref}
-      className="glass-card rounded-xl p-6"
+      className="w-full bg-slate-900/50 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl flex flex-col gap-4"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       viewport={{ once: true }}
     >
-      <h3 className="text-lg font-semibold mb-6">
+      <h3 className="text-lg font-semibold text-white tracking-tight">
         {language === 'hi' ? 'स्कोर कारक विश्लेषण' : 'Score Factor Breakdown'}
       </h3>
 
-      <div className="space-y-4">
+      <div className="space-y-5">
         {sortedFactors.map((factor, i) => {
           const barWidth = (Math.abs(factor.points) / maxAbs) * 100
-          const barColor = factor.is_positive ? '#14b8a6' : '#f43f5e' // Teal/Rose
+          const isPositive = factor.is_positive
 
           return (
             <motion.div
@@ -40,26 +40,28 @@ export default function FactorWaterfall({ factors, language = 'en' }) {
               animate={inView ? { opacity: 1, x: 0 } : {}}
               transition={{ duration: 0.4, delay: i * 0.05 }}
             >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-[var(--color-text-primary)]">
+              {/* Factor name + points on same line */}
+              <div className="flex justify-between items-center w-full mb-1.5">
+                <span className="text-sm font-medium text-white">
                   {language === 'hi' ? factor.label_hi : factor.label}
                 </span>
-                <span className="text-sm font-bold" style={{ color: barColor }}>
-                  {factor.is_positive ? '+' : ''}{factor.points} pts
+                <span className={`text-sm font-bold tabular-nums ${isPositive ? 'text-teal-400' : 'text-rose-400'}`}>
+                  {isPositive ? '+' : ''}{factor.points} pts
                 </span>
               </div>
 
-              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100 dark:bg-[rgba(30,41,59,0.5)]">
+              {/* Slim progress bar */}
+              <div className="h-1.5 rounded-full overflow-hidden bg-slate-800">
                 <motion.div
-                  className="h-full rounded-full"
-                  style={{ backgroundColor: barColor }}
+                  className={`h-full rounded-full ${isPositive ? 'bg-teal-400' : 'bg-rose-500'}`}
                   initial={{ width: 0 }}
                   animate={inView ? { width: `${barWidth}%` } : { width: 0 }}
                   transition={{ duration: 0.8, delay: i * 0.1 + 0.2, ease: [0.4, 0, 0.2, 1] }}
                 />
               </div>
 
-              <p className="text-xs text-[var(--color-text-muted)] mt-1">
+              {/* Sub-score — muted */}
+              <p className="text-xs text-slate-500 mt-1">
                 {language === 'hi' ? factor.description_hi : factor.description}
               </p>
             </motion.div>

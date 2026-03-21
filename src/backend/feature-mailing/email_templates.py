@@ -1,0 +1,299 @@
+"""
+HTML email templates for credit score alerts and spending warnings.
+Tone: constructive criticism with aggressive motivation.
+"""
+
+
+def build_low_score_email(
+    user_name: str,
+    score: int,
+    factor_scores: dict,
+    recommendations: list[str],
+) -> tuple[str, str]:
+    """
+    Build a warning email for credit score below 450.
+
+    Returns:
+        (subject, html_body)
+    """
+    subject = f"⚠️ WAKE-UP CALL: Your Credit Score Dropped to {score} — Time to Fight Back!"
+
+    # Identify weakest factors
+    sorted_factors = sorted(factor_scores.items(), key=lambda x: x[1])
+    weakest = sorted_factors[:3]
+
+    factor_labels = {
+        "payment_consistency": "Payment Consistency",
+        "savings_ratio": "Savings Ratio",
+        "income_stability": "Income Stability",
+        "spending_discipline": "Spending Discipline",
+        "debt_to_income": "Debt-to-Income Ratio",
+    }
+
+    weakness_rows = ""
+    for factor_key, factor_val in weakest:
+        label = factor_labels.get(factor_key, factor_key)
+        bar_width = max(int(factor_val), 5)
+        bar_color = "#EF4444" if factor_val < 40 else "#F59E0B" if factor_val < 60 else "#10B981"
+        weakness_rows += f"""
+        <tr>
+            <td style="padding: 10px 16px; font-weight: 600; color: #1F2937;">{label}</td>
+            <td style="padding: 10px 16px;">
+                <div style="background: #F3F4F6; border-radius: 8px; overflow: hidden; height: 24px;">
+                    <div style="background: {bar_color}; width: {bar_width}%; height: 100%; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 12px; font-weight: 700;">
+                        {int(factor_val)}/100
+                    </div>
+                </div>
+            </td>
+        </tr>"""
+
+    rec_items = ""
+    for i, rec in enumerate(recommendations[:5], 1):
+        rec_items += f"""
+        <tr>
+            <td style="padding: 12px 16px; border-bottom: 1px solid #F3F4F6;">
+                <span style="display: inline-block; width: 28px; height: 28px; background: #6366F1; color: white; border-radius: 50%; text-align: center; line-height: 28px; font-weight: 700; font-size: 13px; margin-right: 12px;">{i}</span>
+                <span style="color: #1F2937; font-size: 15px;">{rec}</span>
+            </td>
+        </tr>"""
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin: 0; padding: 0; background: #0F172A; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #0F172A;">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #DC2626 0%, #991B1B 100%); padding: 40px 32px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 8px;">🚨</div>
+                <h1 style="color: white; font-size: 26px; margin: 0 0 8px 0; font-weight: 800;">
+                    YOUR SCORE IS {score}
+                </h1>
+                <p style="color: #FCA5A5; font-size: 16px; margin: 0;">
+                    This is below the 450 danger zone. But this is NOT the end — it's your starting line.
+                </p>
+            </div>
+
+            <!-- Motivation Block -->
+            <div style="background: #1E293B; padding: 28px 32px; border-left: 4px solid #F59E0B;">
+                <p style="color: #FCD34D; font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">
+                    Hey {user_name}, let's be real.
+                </p>
+                <p style="color: #CBD5E1; font-size: 15px; line-height: 1.6; margin: 0;">
+                    A score of <strong style="color: #EF4444;">{score}</strong> means lenders see you as high-risk.
+                    You need a guarantor or collateral just to be considered for a loan.
+                    <strong style="color: #FCD34D;">But here's the thing — scores change. Yours WILL change.</strong>
+                    Every single person who ever hit 750+ was once where you are now.
+                    The only difference? They decided to fight.
+                </p>
+            </div>
+
+            <!-- Weakest Factors -->
+            <div style="padding: 28px 32px; background: #0F172A;">
+                <h2 style="color: #F1F5F9; font-size: 18px; margin: 0 0 16px 0; font-weight: 700;">
+                    🎯 Where You're Bleeding Points
+                </h2>
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+                    {weakness_rows}
+                </table>
+            </div>
+
+            <!-- Action Plan -->
+            <div style="padding: 0 32px 28px 32px; background: #0F172A;">
+                <h2 style="color: #F1F5F9; font-size: 18px; margin: 0 0 16px 0; font-weight: 700;">
+                    🔥 Your Comeback Playbook
+                </h2>
+                <table style="width: 100%; border-collapse: collapse; background: #1E293B; border-radius: 12px; overflow: hidden;">
+                    {rec_items if rec_items else '<tr><td style="padding: 16px; color: #94A3B8;">Log your daily expenses to unlock personalised recommendations.</td></tr>'}
+                </table>
+            </div>
+
+            <!-- Motivational CTA -->
+            <div style="padding: 32px; background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%); text-align: center;">
+                <p style="color: white; font-size: 20px; font-weight: 800; margin: 0 0 8px 0;">
+                    Stop scrolling. Start acting.
+                </p>
+                <p style="color: #C7D2FE; font-size: 15px; margin: 0 0 20px 0;">
+                    Every day you log your expenses, pay a bill on time, or save even ₹100 — your score climbs.
+                    Consistency beats talent. Discipline beats luck. <strong>You've got this.</strong>
+                </p>
+                <div style="display: inline-block; background: white; color: #4F46E5; padding: 14px 36px; border-radius: 8px; font-weight: 800; font-size: 16px; text-decoration: none;">
+                    LOG TODAY'S EXPENSES NOW →
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 24px 32px; text-align: center; background: #0F172A;">
+                <p style="color: #64748B; font-size: 12px; margin: 0;">
+                    CreditWise — Alternative Credit Risk Assessment Tool<br>
+                    This is an automated alert. You received this because your score dropped below 450.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    return subject, html_body
+
+
+def build_spending_spike_email(
+    user_name: str,
+    current_week_avg: float,
+    historical_avg: float,
+    pct_increase: float,
+    top_categories: list[dict],
+) -> tuple[str, str]:
+    """
+    Build a spending spike warning email.
+
+    Args:
+        user_name: User's display name.
+        current_week_avg: Average daily spending this week (INR).
+        historical_avg: Average daily spending historically (INR).
+        pct_increase: Percentage increase (e.g. 25.3 for 25.3%).
+        top_categories: List of dicts with 'name', 'current', 'average', 'increase_pct'.
+
+    Returns:
+        (subject, html_body)
+    """
+    subject = f"📊 Spending Alert: Your expenses surged {pct_increase:.0f}% this week — Here's your damage report"
+
+    category_rows = ""
+    for cat in top_categories[:4]:
+        arrow = "📈" if cat.get("increase_pct", 0) > 0 else "➡️"
+        color = "#EF4444" if cat.get("increase_pct", 0) > 20 else "#F59E0B" if cat.get("increase_pct", 0) > 0 else "#10B981"
+        category_rows += f"""
+        <tr>
+            <td style="padding: 12px 16px; color: #1F2937; font-weight: 600;">{arrow} {cat['name']}</td>
+            <td style="padding: 12px 16px; color: #6B7280;">₹{cat['average']:,.0f}/day</td>
+            <td style="padding: 12px 16px; color: {color}; font-weight: 700;">₹{cat['current']:,.0f}/day</td>
+            <td style="padding: 12px 16px; color: {color}; font-weight: 700;">+{cat.get('increase_pct', 0):.0f}%</td>
+        </tr>"""
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin: 0; padding: 0; background: #0F172A; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #0F172A;">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #D97706 0%, #B45309 100%); padding: 40px 32px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 8px;">💸</div>
+                <h1 style="color: white; font-size: 24px; margin: 0 0 8px 0; font-weight: 800;">
+                    SPENDING SPIKE DETECTED
+                </h1>
+                <p style="color: #FDE68A; font-size: 16px; margin: 0;">
+                    Your weekly spending is <strong>{pct_increase:.0f}% above</strong> your usual average
+                </p>
+            </div>
+
+            <!-- Reality Check -->
+            <div style="background: #1E293B; padding: 28px 32px; border-left: 4px solid #EF4444;">
+                <p style="color: #F87171; font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">
+                    {user_name}, your wallet is screaming.
+                </p>
+                <p style="color: #CBD5E1; font-size: 15px; line-height: 1.6; margin: 0;">
+                    Your average daily spend this week: <strong style="color: #EF4444;">₹{current_week_avg:,.0f}</strong><br>
+                    Your usual daily average: <strong style="color: #10B981;">₹{historical_avg:,.0f}</strong><br><br>
+                    That's <strong style="color: #FCD34D;">₹{(current_week_avg - historical_avg) * 7:,.0f} extra burned this week</strong>.
+                    This kind of spike tanks your Spending Discipline factor and drags your credit score down. 
+                    <strong style="color: #FCD34D;">But you caught it early — that's what winners do.</strong>
+                </p>
+            </div>
+
+            <!-- Category Breakdown -->
+            <div style="padding: 28px 32px; background: #0F172A;">
+                <h2 style="color: #F1F5F9; font-size: 18px; margin: 0 0 16px 0; font-weight: 700;">
+                    📋 Where Your Money Went
+                </h2>
+                <table style="width: 100%; border-collapse: collapse; background: white; border-radius: 12px; overflow: hidden;">
+                    <tr style="background: #F1F5F9;">
+                        <th style="padding: 10px 16px; text-align: left; font-size: 13px; color: #6B7280;">Category</th>
+                        <th style="padding: 10px 16px; text-align: left; font-size: 13px; color: #6B7280;">Usual</th>
+                        <th style="padding: 10px 16px; text-align: left; font-size: 13px; color: #6B7280;">This Week</th>
+                        <th style="padding: 10px 16px; text-align: left; font-size: 13px; color: #6B7280;">Change</th>
+                    </tr>
+                    {category_rows}
+                </table>
+            </div>
+
+            <!-- Action Items -->
+            <div style="padding: 0 32px 28px 32px; background: #0F172A;">
+                <h2 style="color: #F1F5F9; font-size: 18px; margin: 0 0 16px 0; font-weight: 700;">
+                    ⚡ Immediate Damage Control
+                </h2>
+                <div style="background: #1E293B; border-radius: 12px; padding: 20px;">
+                    <p style="color: #CBD5E1; font-size: 14px; line-height: 1.8; margin: 0;">
+                        <strong style="color: #FCD34D;">1. FREEZE discretionary spending</strong> for the rest of the week. Needs only, no wants.<br>
+                        <strong style="color: #FCD34D;">2. SET a daily budget</strong> of ₹{historical_avg:,.0f} for tomorrow and stick to it.<br>
+                        <strong style="color: #FCD34D;">3. REVIEW</strong> your top spending category above — is there a subscription or habit you can cut?<br>
+                        <strong style="color: #FCD34D;">4. LOG everything</strong> today. Awareness is the #1 predictor of behavior change.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Motivational CTA -->
+            <div style="padding: 32px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); text-align: center;">
+                <p style="color: white; font-size: 20px; font-weight: 800; margin: 0 0 8px 0;">
+                    One bad week doesn't define you.
+                </p>
+                <p style="color: #A7F3D0; font-size: 15px; margin: 0 0 20px 0;">
+                    The fact that you're reading this means you care about your financial future.
+                    That already puts you ahead of 90% of people. <strong>Now prove it with your next expense log.</strong>
+                </p>
+                <div style="display: inline-block; background: white; color: #059669; padding: 14px 36px; border-radius: 8px; font-weight: 800; font-size: 16px; text-decoration: none;">
+                    LOG TODAY'S EXPENSES →
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 24px 32px; text-align: center; background: #0F172A;">
+                <p style="color: #64748B; font-size: 12px; margin: 0;">
+                    CreditWise — Alternative Credit Risk Assessment Tool<br>
+                    This is an automated alert. You received this because your weekly spending spiked 20%+ above average.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+
+    return subject, html_body
+
+
+def build_test_email(user_name: str) -> tuple[str, str]:
+    """Build a simple test email to verify Resend is working."""
+    subject = "✅ CreditWise — Email System Connected!"
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"></head>
+    <body style="margin: 0; padding: 0; background: #0F172A; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto;">
+            <div style="background: linear-gradient(135deg, #4F46E5 0%, #6366F1 100%); padding: 40px 32px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 12px;">🎉</div>
+                <h1 style="color: white; font-size: 24px; margin: 0 0 8px 0;">Connection Successful!</h1>
+                <p style="color: #C7D2FE; font-size: 15px; margin: 0;">
+                    Hey {user_name}, your CreditWise email alerts are now active.
+                </p>
+            </div>
+            <div style="background: #1E293B; padding: 24px 32px;">
+                <p style="color: #CBD5E1; font-size: 15px; line-height: 1.6;">
+                    You'll receive automated emails when:
+                </p>
+                <ul style="color: #CBD5E1; font-size: 14px; line-height: 1.8;">
+                    <li>📉 Your credit score drops below <strong style="color: #EF4444;">450</strong></li>
+                    <li>💸 Your weekly spending spikes <strong style="color: #F59E0B;">20%+</strong> above average</li>
+                </ul>
+                <p style="color: #94A3B8; font-size: 13px; margin-top: 16px;">
+                    This was a test email. No action needed.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return subject, html_body

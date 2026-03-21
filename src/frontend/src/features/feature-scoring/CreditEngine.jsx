@@ -1,6 +1,6 @@
 /**
  * CreditEngine — Story-driven UI showing how credit score is calculated
- * Animated factor bars that fill dynamically
+ * Carbon dark mode with neutral-only palette. Premium slim bars.
  */
 
 import { useRef } from 'react'
@@ -12,45 +12,45 @@ const factors = [
     label: 'Payment Consistency',
     weight: 30,
     impact: 85,
-    icon: '◎',
     description: 'Most predictive of default risk. Tracks rent, bills, and telecom payments.',
-    color: '#10B981',
+    barColor: 'bg-emerald-500',
+    textColor: 'text-emerald-400',
   },
   {
     id: 'savings',
     label: 'Savings Discipline',
     weight: 25,
     impact: 70,
-    icon: '◇',
     description: 'Buffer against income shocks. Especially critical for informal workers.',
-    color: '#d4a843',
+    barColor: 'bg-amber-500',
+    textColor: 'text-amber-400',
   },
   {
     id: 'income',
     label: 'Income Stability',
     weight: 20,
     impact: 60,
-    icon: '△',
     description: 'Variance matters more than amount. Irregular income treated differently.',
-    color: '#c4652a',
+    barColor: 'bg-orange-500',
+    textColor: 'text-orange-400',
   },
   {
     id: 'spending',
     label: 'Spending Discipline',
     weight: 15,
     impact: 75,
-    icon: '◈',
     description: 'Discretionary vs essential spend ratio signals financial maturity.',
-    color: '#b87333',
+    barColor: 'bg-amber-500',
+    textColor: 'text-amber-400',
   },
   {
     id: 'debt',
     label: 'Debt-to-Income Ratio',
     weight: 10,
     impact: 90,
-    icon: '◿',
     description: 'Existing obligations constrain capacity for new credit.',
-    color: '#d4940a',
+    barColor: 'bg-rose-500',
+    textColor: 'text-rose-400',
   },
 ]
 
@@ -72,138 +72,138 @@ const storySteps = [
   },
 ]
 
-function FactorBar({ factor, index }) {
+function FactorRow({ factor, index, isLast }) {
   const ref = useRef(null)
   const inView = useInView(ref, { once: true, margin: '-50px' })
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: -30 }}
+      initial={{ opacity: 0, x: -20 }}
       animate={inView ? { opacity: 1, x: 0 } : {}}
-      transition={{ duration: 0.6, delay: index * 0.12, ease: [0.4, 0, 0.2, 1] }}
-      className="glass-card rounded-xl p-5"
+      transition={{ duration: 0.5, delay: index * 0.1, ease: [0.4, 0, 0.2, 1] }}
+      className={`${!isLast ? 'border-b border-neutral-800/50 pb-6' : ''}`}
     >
-      <div className="flex items-start justify-between mb-3">
-        <div className="flex items-center gap-3">
-          <span className="text-xl" style={{ color: factor.color }}>{factor.icon}</span>
-          <div>
-            <h4 className="font-semibold text-sm">{factor.label}</h4>
-            <p className="text-xs text-[var(--color-text-muted)] mt-0.5">{factor.description}</p>
-          </div>
+      {/* Header: Title + Weight on same line */}
+      <div className="flex justify-between items-start">
+        <div className="flex-1">
+          <h4 className="text-neutral-50 font-medium">{factor.label}</h4>
+          <p className="text-neutral-400 text-sm mt-1">{factor.description}</p>
         </div>
-        <span className="text-sm font-bold px-2 py-0.5 rounded-full" style={{
-          background: `${factor.color}15`,
-          color: factor.color,
-        }}>
+        <span className="text-neutral-500 font-mono text-sm shrink-0 ml-4">
           {factor.weight}%
         </span>
       </div>
 
-      {/* Animated bar */}
-      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
+      {/* Slim progress bar */}
+      <div className="h-1.5 rounded-full overflow-hidden bg-neutral-800 mt-4">
         <motion.div
-          className="h-full rounded-full"
-          style={{ background: `linear-gradient(90deg, ${factor.color}, ${factor.color}aa)` }}
+          className={`h-full rounded-full ${factor.barColor}`}
           initial={{ width: 0 }}
           animate={inView ? { width: `${factor.impact}%` } : { width: 0 }}
-          transition={{ duration: 1.2, delay: index * 0.12 + 0.3, ease: [0.4, 0, 0.2, 1] }}
+          transition={{ duration: 1, delay: index * 0.1 + 0.3, ease: [0.4, 0, 0.2, 1] }}
         />
       </div>
-      <div className="flex justify-between mt-1.5">
-        <span className="text-xs text-[var(--color-text-muted)]">Impact Score</span>
-        <motion.span
-          className="text-xs font-medium"
-          style={{ color: factor.color }}
-          initial={{ opacity: 0 }}
-          animate={inView ? { opacity: 1 } : {}}
-          transition={{ delay: index * 0.12 + 1 }}
-        >
-          {factor.impact}/100
-        </motion.span>
-      </div>
+
+      {/* Impact score — muted system label */}
+      <p className="text-[10px] text-neutral-500 uppercase tracking-widest mt-2">
+        Impact Score {factor.impact}/100
+      </p>
     </motion.div>
   )
 }
 
 export default function CreditEngine() {
   return (
-    <div className="min-h-screen pt-24 pb-16 px-4 md:px-8 max-w-5xl mx-auto">
-      {/* Hero */}
-      <motion.div
-        className="text-center mb-16"
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-      >
-        <span className="inline-block px-4 py-1.5 rounded-full glass-warm text-xs font-medium text-[var(--color-gold)] mb-4">
-          ⚡ THE CREDIT ENGINE
-        </span>
-        <h1 className="text-3xl md:text-5xl font-bold mb-4">
-          How Your Score Is <span className="text-gradient">Calculated</span>
-        </h1>
-        <p className="text-[var(--color-text-secondary)] max-w-2xl mx-auto text-lg">
-          No black boxes. Every factor is transparent, research-backed, and within your control.
-        </p>
-      </motion.div>
+    <main className="w-full min-h-screen bg-neutral-950 flex flex-col items-center">
+      <div className="w-full max-w-7xl mx-auto px-6 py-10 flex flex-col gap-12">
 
-      {/* Story Steps */}
-      <div className="grid md:grid-cols-3 gap-6 mb-16">
-        {storySteps.map((step, i) => {
-          const ref = useRef(null)
-          const inView = useInView(ref, { once: true, margin: '-30px' })
-          return (
-            <motion.div
-              key={i}
-              ref={ref}
-              initial={{ opacity: 0, y: 20 }}
-              animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.15 }}
-              className="glass-card rounded-xl p-6 text-center"
-            >
-              <div className="w-10 h-10 rounded-full gradient-primary flex items-center justify-center text-white font-bold text-sm mx-auto mb-4">
-                {i + 1}
-              </div>
-              <h3 className="font-semibold text-lg mb-2">{step.title}</h3>
-              <p className="text-sm text-[var(--color-text-secondary)] mb-3">{step.subtitle}</p>
-              <p className="text-xs font-medium text-[var(--color-gold)]">{step.highlight}</p>
-            </motion.div>
-          )
-        })}
-      </div>
+        {/* ===== HERO ===== */}
+        <motion.div
+          className="text-center"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+        >
+          <span className="inline-block px-4 py-1.5 rounded-full bg-neutral-900 border border-neutral-800 text-xs font-medium text-neutral-300 mb-4">
+            ⚡ THE CREDIT ENGINE
+          </span>
+          <h1 className="text-3xl md:text-5xl font-bold text-neutral-50 mb-4">
+            How Your Score Is <span className="text-emerald-400">Calculated</span>
+          </h1>
+          <p className="text-neutral-400 max-w-2xl mx-auto text-lg">
+            No black boxes. Every factor is transparent, research-backed, and within your control.
+          </p>
+        </motion.div>
 
-      {/* Factor Bars */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.3 }}
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center">
-          Scoring <span className="text-gradient">Factors</span>
-        </h2>
-        <div className="space-y-4">
-          {factors.map((factor, i) => (
-            <FactorBar key={factor.id} factor={factor} index={i} />
-          ))}
+        {/* ===== STORY CARDS (3-up grid) ===== */}
+        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-6">
+          {storySteps.map((step, i) => {
+            const ref = useRef(null)
+            const inView = useInView(ref, { once: true, margin: '-30px' })
+            return (
+              <motion.div
+                key={i}
+                ref={ref}
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: i * 0.15 }}
+                className="bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-xl flex flex-col gap-3 text-center"
+              >
+                {/* Number bubble — subtle */}
+                <div className="flex items-center justify-center w-8 h-8 rounded-full bg-neutral-800 border border-neutral-700 text-neutral-300 text-sm font-semibold mx-auto">
+                  {i + 1}
+                </div>
+                <h3 className="font-semibold text-lg text-neutral-50">{step.title}</h3>
+                <p className="text-sm text-neutral-400">{step.subtitle}</p>
+                <p className="text-xs font-medium text-emerald-400">{step.highlight}</p>
+              </motion.div>
+            )
+          })}
         </div>
-      </motion.div>
 
-      {/* Bottom CTA */}
-      <motion.div
-        className="mt-16 text-center glass-card rounded-2xl p-8"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        viewport={{ once: true }}
-      >
-        <h3 className="text-xl font-bold mb-2">Your score is always improvable</h3>
-        <p className="text-[var(--color-text-secondary)] mb-4 text-sm">
-          Every factor above can be influenced by your daily financial behavior.
-        </p>
-        <span className="text-[var(--color-gold)] font-medium text-sm">
-          Use the What-If Simulator on the Dashboard to see how changes affect your score →
-        </span>
-      </motion.div>
-    </div>
+        {/* ===== SCORING FACTORS ===== */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="flex flex-col gap-6"
+        >
+          <h2 className="text-2xl font-semibold text-neutral-50 tracking-tight text-center">
+            Scoring Factors
+          </h2>
+
+          {/* Single premium container for all factors */}
+          <div className="w-full bg-neutral-900 border border-neutral-800 rounded-2xl p-6 shadow-xl flex flex-col gap-6">
+            {factors.map((factor, i) => (
+              <FactorRow
+                key={factor.id}
+                factor={factor}
+                index={i}
+                isLast={i === factors.length - 1}
+              />
+            ))}
+          </div>
+        </motion.div>
+
+        {/* ===== BOTTOM CTA ===== */}
+        <motion.div
+          className="bg-neutral-900 border border-neutral-800 rounded-2xl p-8 shadow-xl text-center"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          viewport={{ once: true }}
+        >
+          <h3 className="text-xl font-bold text-neutral-50 mb-2">Your score is always improvable</h3>
+          <p className="text-neutral-400 mb-4 text-sm">
+            Every factor above can be influenced by your daily financial behavior.
+          </p>
+          <span className="text-emerald-400 font-medium text-sm">
+            Use the What-If Simulator on the Dashboard to see how changes affect your score →
+          </span>
+        </motion.div>
+
+      </div>
+    </main>
   )
 }
