@@ -1,18 +1,12 @@
 /**
  * Feature: Dashboard — DailyEntryForm
  * Form to log daily expenses, savings, and bill payment status.
- * 
- * TODO (Teammate 3):
- * - Add smart defaults based on past entries
- * - Add category icons
- * - Add swipe-to-close on mobile
+ * Saves locally and returns entry to parent for localStorage persistence.
  */
 
 import { useState } from 'react'
-import { useAuth } from '../feature-auth/AuthContext'
 
 export default function DailyEntryForm({ onSave, onCancel }) {
-  const { getToken } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -31,41 +25,34 @@ export default function DailyEntryForm({ onSave, onCancel }) {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
-  async function handleSubmit(e) {
+  function handleSubmit(e) {
     e.preventDefault()
     setError('')
-    setLoading(true)
 
-    try {
-      const token = getToken()
-      const response = await fetch('/api/entries', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          ...formData,
-          rent: parseFloat(formData.rent) || 0,
-          food: parseFloat(formData.food) || 0,
-          transport: parseFloat(formData.transport) || 0,
-          discretionary: parseFloat(formData.discretionary) || 0,
-          savings: parseFloat(formData.savings) || 0,
-          notes: formData.notes || null,
-        }),
-      })
+    const food = parseFloat(formData.food) || 0
+    const transport = parseFloat(formData.transport) || 0
 
-      if (response.ok) {
-        onSave?.()
-      } else {
-        const data = await response.json()
-        setError(data.detail || 'Failed to save entry')
-      }
-    } catch {
-      setError('Could not connect to server')
-    } finally {
-      setLoading(false)
+    if (food === 0 && transport === 0) {
+      setError('Please enter at least food or transport expenses')
+      return
     }
+
+    // Build entry object with a unique ID
+    const entry = {
+      id: `entry_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+      date: formData.date,
+      rent: parseFloat(formData.rent) || 0,
+      food,
+      transport,
+      discretionary: parseFloat(formData.discretionary) || 0,
+      savings: parseFloat(formData.savings) || 0,
+      bill_paid_on_time: formData.bill_paid_on_time,
+      notes: formData.notes || null,
+      created_at: new Date().toISOString(),
+    }
+
+    // Return to parent — parent handles localStorage + backend sync
+    onSave?.(entry)
   }
 
   return (
@@ -187,7 +174,7 @@ export default function DailyEntryForm({ onSave, onCancel }) {
             disabled={loading}
             className="flex-1 py-3 rounded-lg gradient-primary text-white font-semibold hover:opacity-90 disabled:opacity-50"
           >
-            {loading ? 'Saving...' : 'Save Entry'}
+            Save Entry
           </button>
           <button
             type="button"

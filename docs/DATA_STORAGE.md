@@ -22,9 +22,12 @@ We use **Supabase** — a hosted PostgreSQL database with built-in auth. All tab
 | Column | Type | Default | Description |
 |--------|------|---------|-------------|
 | `id` | UUID (PK) | — | Same as `auth.users.id` (FK) |
-| `monthly_income` | NUMERIC | 0 | Net monthly income in ₹ |
+| `income_amount` | NUMERIC | 0 | Income in the specified period (₹) |
+| `income_period` | TEXT | `'monthly'` | One of: `monthly`, `quarterly`, `half_yearly` |
+| `monthly_income` | NUMERIC | 0 | Computed monthly income (₹) |
 | `employment_type` | TEXT | `'none'` | One of: `salaried`, `freelance`, `gig`, `self_employed`, `none` |
 | `existing_debt` | NUMERIC | 0 | Total monthly EMI/debt in ₹ |
+| `loans` | JSONB | `'[]'` | Array of loan objects: `[{type, name, emi}]` |
 | `rent_history` | TEXT | `'consistent'` | One of: `consistent`, `occasional_gap`, `irregular` |
 | `bill_payment` | TEXT | `'always_on_time'` | One of: `always_on_time`, `sometimes_late`, `often_late` |
 | `telecom_regularity` | BOOLEAN | `false` | Regular mobile/telecom payments |
@@ -34,9 +37,12 @@ We use **Supabase** — a hosted PostgreSQL database with built-in auth. All tab
 ```sql
 CREATE TABLE user_profiles (
   id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  income_amount NUMERIC DEFAULT 0,
+  income_period TEXT DEFAULT 'monthly',
   monthly_income NUMERIC DEFAULT 0,
   employment_type TEXT DEFAULT 'none',
   existing_debt NUMERIC DEFAULT 0,
+  loans JSONB DEFAULT '[]',
   rent_history TEXT DEFAULT 'consistent',
   bill_payment TEXT DEFAULT 'always_on_time',
   telecom_regularity BOOLEAN DEFAULT false,
@@ -50,6 +56,18 @@ CREATE POLICY "Users can read own profile" ON user_profiles FOR SELECT USING (au
 CREATE POLICY "Users can insert own profile" ON user_profiles FOR INSERT WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can update own profile" ON user_profiles FOR UPDATE USING (auth.uid() = id);
 ```
+
+#### `loans` JSONB format
+
+```json
+[
+  { "type": "personal", "name": "Personal Loan", "emi": 3000 },
+  { "type": "phone", "name": "Phone EMI", "emi": 1500 },
+  { "type": "education", "name": "Education Loan", "emi": 5000 }
+]
+```
+
+**Loan types:** `personal`, `education`, `two_wheeler`, `phone`, `appliance`, `gold`, `microfinance`, `custom`
 
 ---
 

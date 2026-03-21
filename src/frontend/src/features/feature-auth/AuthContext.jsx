@@ -3,6 +3,8 @@
  * React context for managing authentication state across the app.
  * 
  * States: loading | unauthenticated | authenticated_no_profile | authenticated
+ * 
+ * Profile is persisted to localStorage so it survives page refreshes.
  */
 
 import { createContext, useContext, useState, useEffect } from 'react'
@@ -10,12 +12,37 @@ import supabase from '../../lib/supabase'
 
 const AuthContext = createContext(null)
 
+const PROFILE_STORAGE_KEY = 'hackerzstreet_profile'
+
+function loadStoredProfile() {
+  try {
+    const stored = localStorage.getItem(PROFILE_STORAGE_KEY)
+    return stored ? JSON.parse(stored) : null
+  } catch {
+    return null
+  }
+}
+
+function saveStoredProfile(profile) {
+  if (profile) {
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile))
+  } else {
+    localStorage.removeItem(PROFILE_STORAGE_KEY)
+  }
+}
+
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [user, setUser] = useState(null)
-  const [profile, setProfile] = useState(null)
+  const [profile, setProfileState] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [authState, setAuthState] = useState('loading') // loading | unauthenticated | authenticated_no_profile | authenticated
+  const [authState, setAuthState] = useState('loading')
+
+  // Wrap setProfile to also persist to localStorage
+  function setProfile(newProfile) {
+    setProfileState(newProfile)
+    saveStoredProfile(newProfile)
+  }
 
   useEffect(() => {
     // Check initial session
@@ -23,7 +50,7 @@ export function AuthProvider({ children }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.access_token)
+        restoreOrFetchProfile(session.access_token)
       } else {
         setAuthState('unauthenticated')
         setLoading(false)
@@ -35,7 +62,7 @@ export function AuthProvider({ children }) {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        fetchProfile(session.access_token)
+        restoreOrFetchProfile(session.access_token)
       } else {
         setProfile(null)
         setAuthState('unauthenticated')
@@ -45,7 +72,24 @@ export function AuthProvider({ children }) {
     return () => subscription?.unsubscribe()
   }, [])
 
-  async function fetchProfile(token) {
+  async function restoreOrFetchProfile(token) {
+    // First try localStorage (instant — survives refresh)
+    const stored = loadStoredProfile()
+    if (stored) {
+      setProfileState(stored)
+      setAuthState('authenticated')
+      setLoading(false)
+
+      // Background sync with backend (non-blocking)
+      fetchProfileFromBackend(token).catch(() => {})
+      return
+    }
+
+    // No stored profile — try backend
+    await fetchProfileFromBackend(token)
+  }
+
+  async function fetchProfileFromBackend(token) {
     try {
       const response = await fetch('/api/profile', {
         headers: { 'Authorization': `Bearer ${token}` }
@@ -58,11 +102,16 @@ export function AuthProvider({ children }) {
       } else if (response.status === 404) {
         setAuthState('authenticated_no_profile')
       } else {
-        setAuthState('authenticated_no_profile')
+        // Backend error — check localStorage as fallback
+        if (!loadStoredProfile()) {
+          setAuthState('authenticated_no_profile')
+        }
       }
     } catch {
-      // Backend might not be running yet — still authenticated
-      setAuthState('authenticated_no_profile')
+      // Backend not running — check localStorage
+      if (!loadStoredProfile()) {
+        setAuthState('authenticated_no_profile')
+      }
     } finally {
       setLoading(false)
     }
