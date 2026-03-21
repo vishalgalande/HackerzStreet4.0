@@ -297,3 +297,91 @@ def build_test_email(user_name: str) -> tuple[str, str]:
     </html>
     """
     return subject, html_body
+
+
+def build_timer_complete_email(
+    user_name: str,
+    item_description: str = "",
+    item_price: float = 0,
+) -> tuple[str, str]:
+    """Build email sent when anti-impulse timer waiting period is over."""
+    price_str = f"₹{item_price:,.0f}" if item_price > 0 else ""
+    item_display = item_description or "an impulse purchase"
+
+    subject = f"⏰ Timer Up: Do you still want {item_display}?" if item_description else "⏰ Your Waiting Period is Over — Decision Time!"
+
+    item_block = ""
+    if item_description or item_price > 0:
+        item_block = f"""
+            <!-- Item Details -->
+            <div style="padding: 24px 32px; background: #0F172A;">
+                <div style="background: #1E293B; border-radius: 16px; padding: 24px; text-align: center; border: 1px solid rgba(20, 184, 166, 0.2);">
+                    <p style="color: #94A3B8; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">You were tempted by</p>
+                    <p style="color: #F1F5F9; font-size: 22px; font-weight: 700; margin: 0 0 4px 0;">
+                        🛍️ {item_description or "Impulse Purchase"}
+                    </p>
+                    {"<p style='color: #14B8A6; font-size: 28px; font-weight: 800; margin: 8px 0 0 0;'>" + price_str + "</p>" if price_str else ""}
+                </div>
+            </div>
+        """
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin: 0; padding: 0; background: #0F172A; font-family: 'Segoe UI', Arial, sans-serif;">
+        <div style="max-width: 600px; margin: 0 auto; background: #0F172A;">
+
+            <!-- Header -->
+            <div style="background: linear-gradient(135deg, #14B8A6 0%, #06B6D4 100%); padding: 40px 32px; text-align: center;">
+                <div style="font-size: 48px; margin-bottom: 8px;">⏰</div>
+                <h1 style="color: white; font-size: 24px; margin: 0 0 8px 0; font-weight: 800;">
+                    TIME'S UP!
+                </h1>
+                <p style="color: #A7F3D0; font-size: 16px; margin: 0;">
+                    Your anti-impulse waiting period has ended
+                </p>
+            </div>
+
+            {item_block}
+
+            <!-- Decision Block -->
+            <div style="background: #1E293B; padding: 28px 32px; border-left: 4px solid #14B8A6;">
+                <p style="color: #5EEAD4; font-size: 18px; font-weight: 700; margin: 0 0 8px 0;">
+                    Hey {user_name}, it's decision time.
+                </p>
+                <p style="color: #CBD5E1; font-size: 15px; line-height: 1.6; margin: 0;">
+                    You set a waiting period before buying <strong style="color: #F1F5F9;">{item_display}</strong>{" for <strong style='color: #14B8A6;'>" + price_str + "</strong>" if price_str else ""}. That period is now over.<br><br>
+                    <strong style="color: #FCD34D;">Ask yourself:</strong><br>
+                    • Do you still want to buy it?<br>
+                    • Is it a need or a want?<br>
+                    • Will you regret it next month?<br><br>
+                    If the urge has faded, <strong style="color: #14B8A6;">congratulations!</strong>
+                    {"You just saved <strong style='color: #10B981;'>" + price_str + "</strong> and" if price_str else "You"} improved your Spending Discipline score.
+                </p>
+            </div>
+
+            <!-- Stats -->
+            <div style="padding: 32px; background: linear-gradient(135deg, #059669 0%, #10B981 100%); text-align: center;">
+                <p style="color: white; font-size: 20px; font-weight: 800; margin: 0 0 8px 0;">
+                    Impulse control = financial freedom.
+                </p>
+                <p style="color: #A7F3D0; font-size: 15px; margin: 0;">
+                    Studies show that waiting 12–24 hours eliminates 70% of impulse purchases.
+                    <strong>You just beat the system.</strong>
+                </p>
+            </div>
+
+            <!-- Footer -->
+            <div style="padding: 24px 32px; text-align: center; background: #0F172A;">
+                <p style="color: #64748B; font-size: 12px; margin: 0;">
+                    FinFix — Alternative Credit Risk Assessment Tool<br>
+                    This timer notification was sent because your anti-impulse timer completed.
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return subject, html_body
+

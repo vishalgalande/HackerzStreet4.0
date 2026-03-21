@@ -3,7 +3,7 @@ FastAPI routes for the email notification system.
 Provides endpoints to check/send alerts and test the email connection.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from email_models import AlertCheckRequest, AlertCheckResponse, TestEmailRequest
 from email_triggers import check_and_send_alerts
 from email_service import send_email, is_email_enabled
@@ -60,3 +60,25 @@ async def send_test_email(req: TestEmailRequest):
             else f"Failed to send: {result['error']}"
         ),
     }
+
+
+@router.get("/alerts")
+async def get_alerts(request: Request):
+    """
+    Fetch all email logs (sent alerts) for the notifications page.
+    Returns most recent first.
+    """
+    from supabase_client import supabase_request, is_supabase_enabled
+
+    if is_supabase_enabled():
+        result = await supabase_request(
+            "GET", "email_logs",
+            params={
+                "order": "sent_at.desc",
+                "limit": "50",
+            },
+        )
+        if result is not None:
+            return {"alerts": result, "count": len(result)}
+
+    return {"alerts": [], "count": 0}

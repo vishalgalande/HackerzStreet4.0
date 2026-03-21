@@ -21,10 +21,11 @@ import ProfileSetup from './features/feature-auth/ProfileSetup'
 import Dashboard from './features/feature-dashboard/Dashboard'
 import CreditEngine from './features/feature-scoring/CreditEngine'
 import AlertsPage from './features/feature-dashboard/AlertsPage'
-import InvestmentsPage from './features/feature-dashboard/InvestmentsPage'
 import SavingsPage from './features/feature-dashboard/SavingsPage'
 import AntiImpulsivity from './features/feature-dashboard/AntiImpulsivity'
 import LenderDashboard from './features/feature-loans/LenderDashboard'
+import ChimcharAssistant from './features/feature-ai/ChimcharAssistant'
+import ChimcharFloating from './features/feature-ai/ChimcharFloating'
 import Navbar from './components/Navbar'
 import ScoreGauge from './features/feature-scoring/ScoreGauge'
 import FactorWaterfall from './features/feature-scoring/FactorWaterfall'
@@ -41,19 +42,22 @@ const pageTransition = {
 
 function PageRenderer({ page }) {
   return (
-    <AnimatePresence mode="wait">
-      <motion.div key={page} {...pageTransition}>
-        {page === 'dashboard' && <Dashboard />}
-        {page === 'lender-dashboard' && <LenderDashboard />}
-        {page === 'credit-engine' && <CreditEngine />}
-        {page === 'alerts' && <AlertsPage />}
-        {page === 'investments' && <InvestmentsPage />}
-        {page === 'savings' && <SavingsPage />}
-        {page === 'anti-impulse' && <AntiImpulsivity />}
-      </motion.div>
-    </AnimatePresence>
+    <div style={{ paddingTop: 'var(--page-padding-top, 90px)' }}>
+      <AnimatePresence mode="wait">
+        <motion.div key={page} {...pageTransition}>
+          {page === 'dashboard' && <Dashboard />}
+          {page === 'lender-dashboard' && <LenderDashboard />}
+          {page === 'credit-engine' && <CreditEngine />}
+          {page === 'alerts' && <AlertsPage />}
+          {page === 'savings' && <SavingsPage />}
+          {page === 'anti-impulse' && <AntiImpulsivity />}
+          {page === 'chimchar' && <ChimcharAssistant />}
+        </motion.div>
+      </AnimatePresence>
+    </div>
   )
 }
+
 
 function AppContent() {
   const { authState, loading, signOut } = useAuth()
@@ -79,7 +83,27 @@ function AppContent() {
 
 
 
-  // Auth page
+  // Authenticated flows — must check BEFORE view === 'auth'
+  // so that after login the user immediately sees the dashboard
+  if (authState === 'authenticated_no_profile') {
+    return <ProfileSetup />
+  }
+
+  if (authState === 'authenticated') {
+    return (
+      <div className="min-h-screen">
+        <Navbar
+          activePage={activePage}
+          onNavigate={setActivePage}
+          onSignOut={signOut || (() => setView('home'))}
+        />
+        <PageRenderer page={activePage} />
+        <ChimcharFloating />
+      </div>
+    )
+  }
+
+  // Auth page (only shown when NOT authenticated)
   if (view === 'auth') {
     return (
       <div className="relative">
@@ -91,24 +115,6 @@ function AppContent() {
           ← Back
         </motion.button>
         <AuthPage />
-      </div>
-    )
-  }
-
-  // Authenticated flows
-  if (authState === 'authenticated_no_profile') {
-    return <ProfileSetup />
-  }
-
-  if (authState === 'authenticated' || view === 'app') {
-    return (
-      <div className="min-h-screen">
-        <Navbar
-          activePage={activePage}
-          onNavigate={setActivePage}
-          onSignOut={signOut || (() => setView('home'))}
-        />
-        <PageRenderer page={activePage} />
       </div>
     )
   }

@@ -378,7 +378,7 @@ export default function Dashboard() {
     <div className="page-container pb-16" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* TOP SECTION: Horizontal Card for Selectors & Actions */}
-      <div className="glass-card rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4 border border-slate-800/60 shadow-lg">
+      <div className="bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
         <div className="flex items-center gap-5 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
           <div className="flex items-center gap-3 shrink-0">
             <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Profile:</span>
@@ -396,10 +396,10 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => setShowEntryForm(true)} className="bg-slate-800/80 hover:bg-slate-700 text-teal-400 border border-teal-500/20 px-5 py-2.5 rounded-xl text-[15px] font-medium transition-colors">
-            + Log Today
+          <button onClick={() => setShowEntryForm(true)} className="px-4 py-2 rounded-lg text-sm font-medium border border-[#FF8C00]/40 text-[#FFC857] hover:bg-[#FF8C00]/10 transition-colors">
+            Log Today
           </button>
-          <button onClick={computeBackendScore} disabled={computing} className="bg-teal-500 hover:bg-teal-400 text-slate-900 px-6 py-2.5 rounded-xl text-[15px] font-bold transition-all disabled:opacity-50 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+          <button onClick={computeBackendScore} disabled={computing} className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-br from-[#FF8C00] to-[#FFC857] text-black hover:opacity-90 transition-opacity">
             {computing ? 'Computing...' : 'Refresh Score'}
           </button>
         </div>
@@ -409,7 +409,7 @@ export default function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         
         {/* Bills & Loans */}
-        <div className="lg:col-span-4 xl:col-span-3 glass-card rounded-2xl p-7 border border-slate-800/60 flex flex-col justify-between hover:border-slate-700 transition-colors shadow-lg">
+        <div className="lg:col-span-4 xl:col-span-3 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-colors">
           <div>
             <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
               <span className="text-base">◎</span> Bills & Loans
@@ -430,7 +430,7 @@ export default function Dashboard() {
         </div>
 
         {/* Central Score Gauge */}
-        <div className="lg:col-span-4 xl:col-span-6 glass-card rounded-2xl p-10 border border-slate-800/60 relative overflow-hidden flex flex-col items-center justify-center min-h-[380px] shadow-xl hover:shadow-[0_0_40px_rgba(20,184,166,0.05)] transition-shadow group">
+        <div className="lg:col-span-4 xl:col-span-6 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[380px] hover:shadow-[0_0_40px_rgba(20,184,166,0.05)] transition-shadow group">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-1000" style={{ background: scoreResult.color }} />
           
           <ScoreGauge
@@ -455,7 +455,7 @@ export default function Dashboard() {
         </div>
 
         {/* Improve Score Tips */}
-        <div className="lg:col-span-4 xl:col-span-3 glass-card rounded-2xl p-7 border border-slate-800/60 flex flex-col hover:border-slate-700 transition-colors shadow-lg">
+        <div className="lg:col-span-4 xl:col-span-3 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 flex flex-col hover:border-slate-700 transition-colors">
           <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
             <span className="text-base">⚡</span> Quick Improvements
           </h3>
@@ -477,59 +477,45 @@ export default function Dashboard() {
 
       {/* ROW 2: Upcoming Payments & Trend Graph */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-7 glass-card rounded-2xl p-7 md:p-8 border border-slate-800/60 shadow-lg">
-          <div className="flex items-center justify-between mb-8">
-            <h3 className="text-[14px] font-semibold text-slate-400 uppercase tracking-wider flex items-center gap-2">
-              <span className="text-lg">📅</span> Upcoming Payments
+        <div className="lg:col-span-7 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 md:p-8">
+          <div className="flex justify-between items-end mb-6">
+            <h3 className="text-[13px] font-semibold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
+              <span className="text-base">📅</span> Upcoming Payments
             </h3>
-            <button className="text-[13px] text-teal-400 hover:text-teal-300 transition-colors bg-teal-500/10 px-3 py-1.5 rounded-lg">View All</button>
+            <button className="text-[13px] text-[#FFC857] opacity-80 hover:opacity-100 transition-opacity">
+              View All
+            </button>
           </div>
           
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-slate-800 text-[13px] text-slate-500 uppercase tracking-wider">
-                  <th className="pb-4 font-medium">Biller / Institution</th>
-                  <th className="pb-4 font-medium">Type</th>
-                  <th className="pb-4 font-medium">Due Date</th>
-                  <th className="pb-4 text-right font-medium">Amount</th>
-                </tr>
-              </thead>
-              <tbody className="text-[15px]">
-                <tr className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-rose-400 text-lg">⚡</div>
-                    Lumiere Energy
-                  </td>
-                  <td className="py-5 text-slate-400">Utility</td>
-                  <td className="py-5 text-orange-400 font-medium">Tomorrow</td>
-                  <td className="py-5 text-right text-slate-200 font-bold">₹1,450</td>
-                </tr>
-                <tr className="border-b border-slate-800/50 hover:bg-slate-800/20 transition-colors">
-                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-teal-400 text-lg">📱</div>
-                    AirNet Telecom
-                  </td>
-                  <td className="py-5 text-slate-400">Internet</td>
-                  <td className="py-5 text-slate-300 font-medium">Oct 14</td>
-                  <td className="py-5 text-right text-slate-200 font-bold">₹999</td>
-                </tr>
-                <tr className="hover:bg-slate-800/20 transition-colors">
-                  <td className="py-5 text-slate-200 font-medium flex items-center gap-4">
-                    <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-emerald-400 text-lg">🏦</div>
-                    HDFC Auto Loan
-                  </td>
-                  <td className="py-5 text-slate-400">EMI</td>
-                  <td className="py-5 text-slate-300 font-medium">Oct 20</td>
-                  <td className="py-5 text-right text-slate-200 font-bold">₹12,500</td>
-                </tr>
-              </tbody>
-            </table>
+          <div className="flex flex-col">
+            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
+              <div className="flex flex-col gap-1">
+                <span className="text-[14px] font-medium text-neutral-200">Lumiere Energy</span>
+                <span className="text-[12px] text-neutral-500">Utility • Tomorrow</span>
+              </div>
+              <span className="text-[14px] font-bold text-neutral-50">₹1,450</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
+              <div className="flex flex-col gap-1">
+                <span className="text-[14px] font-medium text-neutral-200">AirNet Telecom</span>
+                <span className="text-[12px] text-neutral-500">Internet • Oct 14</span>
+              </div>
+              <span className="text-[14px] font-bold text-neutral-50">₹999</span>
+            </div>
+            
+            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
+              <div className="flex flex-col gap-1">
+                <span className="text-[14px] font-medium text-neutral-200">HDFC Auto Loan</span>
+                <span className="text-[12px] text-neutral-500">EMI • Oct 20</span>
+              </div>
+              <span className="text-[14px] font-bold text-neutral-50">₹12,500</span>
+            </div>
           </div>
         </div>
 
         {/* Trend Graph */}
-        <div className="lg:col-span-5 glass-card rounded-2xl p-7 md:p-8 border border-slate-800/60 shadow-lg flex flex-col">
+        <div className="lg:col-span-5 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 md:p-8 flex flex-col">
           <h3 className="text-[14px] font-semibold text-slate-400 uppercase tracking-wider mb-8 flex items-center gap-2">
             <span className="text-lg">📈</span> Trajectory Forecast
           </h3>
@@ -544,15 +530,15 @@ export default function Dashboard() {
 
       {/* ROW 3: Action Buttons */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
           <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-rose-500/20 transition-all">💳</div>
           <span className="text-[15px] font-medium text-slate-200">Pay Outstanding Bills</span>
         </button>
-        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
           <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">📉</div>
           <span className="text-[15px] font-medium text-slate-200">Reduce Active Debt</span>
         </button>
-        <button className="glass-card bg-slate-800/40 hover:bg-slate-800/80 border border-slate-700/60 p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:shadow-lg group">
+        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
           <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">💰</div>
           <span className="text-[15px] font-medium text-slate-200">Boost Savings Rate</span>
         </button>

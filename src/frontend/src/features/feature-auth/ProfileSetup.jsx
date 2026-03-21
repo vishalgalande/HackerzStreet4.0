@@ -11,6 +11,8 @@
 import { useState } from 'react'
 import { useAuth } from './AuthContext'
 
+const API = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+
 const LOAN_PRESETS = [
   { id: 'personal', label: '💳 Personal Loan', icon: '💳' },
   { id: 'education', label: '🎓 Education Loan', icon: '🎓' },
@@ -23,7 +25,7 @@ const LOAN_PRESETS = [
 ]
 
 export default function ProfileSetup() {
-  const { getToken, setProfile, setAuthState } = useAuth()
+  const { user, getToken, setProfile, setAuthState } = useAuth()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -106,7 +108,11 @@ export default function ProfileSetup() {
 
     try {
       const token = getToken()
-      const response = await fetch('/api/profile', {
+      // Add email from auth user
+      profileData.email = user?.email || ''
+      profileData.full_name = user?.user_metadata?.full_name || user?.email || ''
+
+      const response = await fetch(`${API}/api/profile`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

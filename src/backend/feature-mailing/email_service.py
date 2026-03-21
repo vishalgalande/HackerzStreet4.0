@@ -66,6 +66,21 @@ async def send_email(to: str, subject: str, html_body: str) -> dict:
 
             if response.status_code in (200, 201):
                 data = response.json()
+                # Log to email_logs in Supabase
+                try:
+                    from supabase_client import supabase_request as _sb_req, is_supabase_enabled as _sb_ok
+                    if _sb_ok():
+                        await _sb_req(
+                            "POST", "email_logs",
+                            json={
+                                "email": to,
+                                "subject": subject,
+                                "type": "general",
+                                "preview": html_body[:200].replace("<", "").replace(">", "")[:100] if html_body else "",
+                            },
+                        )
+                except Exception:
+                    pass  # Don't fail the email send if logging fails
                 return {"success": True, "id": data.get("id"), "error": None}
             else:
                 error_msg = f"Resend API error: {response.status_code} — {response.text}"

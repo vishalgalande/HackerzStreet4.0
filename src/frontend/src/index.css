@@ -2,50 +2,53 @@
 @import "tailwindcss";
 
 /* ============================
-   FinFix Alternative Credit System
-   Neo-Bank / Forensic UI Design System
+   FinFix — Premium Dark Amber Design System
+   Black + Burnt Orange + Warm Amber
    ============================ */
 
-/* Google Fonts */
-
-/* CSS Custom Properties — Sky/Teal Slate Palette (Dark Mode Default) */
+/* CSS Custom Properties — Warm Dark Palette */
 :root {
-  /* Score band colors */
-  --color-excellent: #14b8a6; /* Teal-500 */
-  --color-good: #0ea5e9;      /* Sky-500 */
-  --color-fair: #f59e0b;      /* Amber-500 */
-  --color-poor: #f43f5e;      /* Rose-500 */
+  /* ── Backgrounds ── */
+  --color-bg-primary:    #0B0B0B;
+  --color-bg-secondary:  #111111;
+  --color-bg-card:       #161616;
+  --color-bg-elevated:   #1C1C1C;
 
-  /* Neo-Bank Palette */
-  --color-teal: #14b8a6;
-  --color-emerald: #10b981;
-  --color-rose: #f43f5e;
-  --color-cyan: #06b6d4;
-  --color-slate-100: #f1f5f9;
-  --color-slate-800: #1e293b;
+  /* ── Accent Palette ── */
+  --color-accent:        #FF8C00;   /* Burnt orange — primary CTA */
+  --color-accent-warm:   #FFC857;   /* Warm amber — secondary / text */
+  --color-accent-soft:   rgba(255, 140, 0, 0.12);
+  --color-accent-glow:   rgba(255, 140, 0, 0.25);
 
-  /* Global Base — Slate Dark Mode */
-  --color-bg-primary: #020617; /* Slate-950 */
-  --color-bg-secondary: #0f172a; /* Slate-900 */
-  --color-bg-card: #0f172a;      /* Slate-900 */
-  --color-bg-elevated: #1e293b;  /* Slate-800 */
-  
-  --color-text-primary: #ffffff;
-  --color-text-secondary: #94a3b8; /* Slate-400 */
-  --color-text-muted: #64748b;     /* Slate-500 */
-  
-  --color-border: #1e293b;       /* Slate-800 */
-  --color-border-light: rgba(255, 255, 255, 0.08);
+  /* ── Text ── */
+  --color-text-primary:   #EDEDED;
+  --color-text-secondary: #A1A1A1;
+  --color-text-muted:     #666666;
 
-  /* Legacy mappings (so components don't immediately break before refactor) */
-  --color-primary: #14b8a6;
-  --color-gold: #ffffff; 
-  --color-copper: #94a3b8;
-  --color-amber: #0ea5e9;
-  --color-burnt-orange: #14b8a6;
+  /* ── Borders ── */
+  --color-border:         #282828;
+  --color-border-light:   rgba(255, 255, 255, 0.06);
+  --color-border-accent:  rgba(255, 140, 0, 0.25);
+
+  /* ── Score band colors ── */
+  --color-excellent: #22c55e;   /* green — kept for score bands only */
+  --color-good:      #FFC857;   /* amber */
+  --color-fair:      #FF8C00;   /* orange */
+  --color-poor:      #ef4444;   /* red */
+
+  /* ── Legacy token compatibility ── */
+  --color-teal:        #FF8C00;   /* Remapped → accent */
+  --color-emerald:     #22c55e;   /* Kept only for success states */
+  --color-rose:        #ef4444;
+  --color-cyan:        #FFC857;   /* Remapped → amber */
+  --color-gold:        #FFC857;
+  --color-amber:       #FF8C00;
+  --color-burnt-orange:#FF8C00;
+  --color-primary:     #FF8C00;
+  --color-copper:      #A1A1A1;
 }
 
-/* Base styles */
+/* ── Base Reset ── */
 * {
   margin: 0;
   padding: 0;
@@ -80,84 +83,95 @@ h2 { font-size: 26px; font-weight: 600; }
 h3 { font-size: 20px; font-weight: 600; }
 h4 { font-size: 18px; font-weight: 500; }
 
-/* ============ NEURO-GLASSMORPHISM ============ */
-/* Replacing messy brown glass with hyper-premium forensic glass */
+/* ============ GLASSMORPHISM — WARM DARK ============ */
 .glass {
-  background: rgba(15, 23, 42, 0.7); /* Slate-900 */
+  background: rgba(22, 22, 22, 0.75);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--color-border-light);
 }
 
 .glass-card {
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(22, 22, 22, 0.6);
   backdrop-filter: blur(32px);
   -webkit-backdrop-filter: blur(32px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 24px;
-  transition: all 0.3s ease;
+  transition: all 0.25s ease;
 }
 
 .glass-card:hover {
-  border-color: rgba(20, 184, 166, 0.25);
-  background: rgba(15, 23, 42, 0.7);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(20, 184, 166, 0.1);
+  border-color: var(--color-border-accent);
+  background: rgba(28, 28, 28, 0.8);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 140, 0, 0.08);
   transform: translateY(-1px);
 }
 
+/* Warm glass variant for special cards */
+.glass-warm {
+  background: rgba(255, 140, 0, 0.06);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 140, 0, 0.15);
+}
+
 /* ============ GRADIENTS & GLOWS ============ */
-/* Strict, high-contrast, beautiful */
 .text-gradient {
-  background: linear-gradient(135deg, #ffffff, #94a3b8);
+  background: linear-gradient(135deg, #FF8C00, #FFC857);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .text-teal-gradient {
-  background: linear-gradient(135deg, #14b8a6, #06b6d4);
+  background: linear-gradient(135deg, #FF8C00, #FFC857);
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
 .gradient-primary {
-  background: linear-gradient(135deg, #14b8a6, #06b6d4);
+  background: linear-gradient(135deg, #FF8C00, #FFC857);
 }
 
-/* Replacing massive brown gradients with subtle teal blurred orbs */
+/* Ambient orb — warm orange glow */
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  background: rgba(20, 184, 166, 0.15); /* Teal */
+  background: rgba(255, 140, 0, 0.10);
   filter: blur(100px);
   pointer-events: none;
 }
 
-/* ============ BUTTONS (Forensic/Premium) ============ */
+/* ============ BUTTONS ============ */
 .btn-primary {
-  background: #ffffff;
-  color: #020617; /* Slate 950 text */
-  font-weight: 600;
+  background: linear-gradient(135deg, #FF8C00, #FFC857);
+  color: #0B0B0B;
+  font-weight: 700;
   padding: 12px 28px;
   border-radius: 12px;
-  border: 1px solid #ffffff;
+  border: none;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 14px rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 16px rgba(255, 140, 0, 0.25);
+  letter-spacing: -0.01em;
 }
 
 .btn-primary:hover {
-  background: #f8fafc;
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(255, 255, 255, 0.15);
+  box-shadow: 0 6px 24px rgba(255, 140, 0, 0.35);
+  filter: brightness(1.05);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
 }
 
 .btn-secondary {
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  border: 1px solid var(--color-border-accent);
+  color: var(--color-accent-warm);
   font-weight: 500;
   padding: 12px 28px;
   border-radius: 12px;
@@ -167,8 +181,9 @@ h4 { font-size: 18px; font-weight: 500; }
 }
 
 .btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  background: rgba(255, 255, 255, 0.03);
+  border-color: var(--color-accent);
+  background: var(--color-accent-soft);
+  color: var(--color-accent-warm);
 }
 
 /* ============ FORM INPUTS ============ */
@@ -176,31 +191,32 @@ h4 { font-size: 18px; font-weight: 500; }
   width: 100%;
   padding: 12px 16px;
   border-radius: 10px;
-  background: rgba(30, 41, 59, 0.5); /* Faint slate inset */
-  border: 1px solid transparent;
-  color: #ffffff;
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
   font-size: 15px;
   transition: all 0.2s ease;
   outline: none;
+  font-family: inherit;
 }
 
 .input-field:focus {
-  border-color: #14b8a6; /* Teal edge */
-  box-shadow: 0 0 0 1px #14b8a6; /* Exact 1px ring */
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 1px rgba(255, 140, 0, 0.3);
 }
 
 .input-field::placeholder {
-  color: #64748b; /* Slate 500 */
+  color: var(--color-text-muted);
 }
 
-/* Sleek range slider */
+/* Range slider */
 input[type="range"] {
   -webkit-appearance: none;
   appearance: none;
-  height: 4px; /* Ultra thin */
+  height: 4px;
   border-radius: 2px;
   outline: none;
-  background: #1e293b; /* Slate 800 */
+  background: var(--color-bg-elevated);
 }
 
 input[type="range"]::-webkit-slider-thumb {
@@ -209,53 +225,51 @@ input[type="range"]::-webkit-slider-thumb {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #ffffff; /* Pristine white thumb */
+  background: var(--color-accent);
   cursor: pointer;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.4);
   transition: all 0.2s ease;
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {
-  background: #14b8a6; /* Tint teal on drag/hover */
-  transform: scale(1.1);
-  box-shadow: 0 0 12px rgba(20, 184, 166, 0.4);
+  background: var(--color-accent-warm);
+  transform: scale(1.15);
+  box-shadow: 0 0 14px rgba(255, 140, 0, 0.5);
 }
 
 /* ============ SCROLLBAR ============ */
 ::-webkit-scrollbar {
-  width: 4px; /* Thinner scrollbar */
+  width: 4px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #020617; /* Slate 950 */
+  background: var(--color-bg-primary);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1e293b; /* Slate 800 */
+  background: #2A2A2A;
   border-radius: 2px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #334155; /* Slate 700 */
+  background: rgba(255, 140, 0, 0.3);
 }
 
 /* ============ UTILITY CLASSES ============ */
-/* Stripping out old colored text utilities and mapping to new ones */
-.text-gold { color: #ffffff; } /* Re-mapped to white for stark contrast */
-.text-copper { color: #94a3b8; } /* Slate 400 */
-.text-amber { color: #e2e8f0; } /* Slate 200 */
+.text-gold        { color: var(--color-accent-warm); }
+.text-copper      { color: var(--color-text-secondary); }
+.text-amber       { color: var(--color-accent-warm); }
+.text-teal        { color: var(--color-accent); }
+.text-emerald     { color: #22c55e; }
+.text-rose        { color: var(--color-poor); }
 
-.text-teal { color: var(--color-teal); }
-.text-emerald { color: var(--color-emerald); }
-.text-rose { color: var(--color-rose); }
-
-/* System Labels (Forensic Typography) */
+/* System label */
 .system-label {
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   font-weight: 600;
-  color: #94a3b8; /* Slate 400 for better contrast */
+  color: var(--color-text-muted);
 }
 
 .number-morph {
@@ -263,57 +277,59 @@ input[type="range"]::-webkit-slider-thumb:hover {
   display: inline-block;
 }
 
+/* ============ ANIMATIONS ============ */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .fade-in {
   animation: fadeIn 0.4s ease-out forwards;
 }
 
-/* Staggered fade-in for lists */
 .fade-in-stagger > * {
   opacity: 0;
   animation: fadeIn 0.4s ease-out forwards;
 }
 
 .fade-in-stagger > *:nth-child(1) { animation-delay: 0.05s; }
-.fade-in-stagger > *:nth-child(2) { animation-delay: 0.1s; }
+.fade-in-stagger > *:nth-child(2) { animation-delay: 0.10s; }
 .fade-in-stagger > *:nth-child(3) { animation-delay: 0.15s; }
-.fade-in-stagger > *:nth-child(4) { animation-delay: 0.2s; }
+.fade-in-stagger > *:nth-child(4) { animation-delay: 0.20s; }
 .fade-in-stagger > *:nth-child(5) { animation-delay: 0.25s; }
-.fade-in-stagger > *:nth-child(6) { animation-delay: 0.3s; }
+.fade-in-stagger > *:nth-child(6) { animation-delay: 0.30s; }
 
-/* Background pattern removed in favor of pure slate */
-.animated-gradient {
-  background: var(--color-bg-primary); 
+@keyframes ambientPulse {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50%       { opacity: 0.14; transform: scale(1.05); }
 }
 
-/* ============ LAYOUT SYSTEM ============ */
-/* Global page container — centers content, constrains width */
+.animated-gradient {
+  background: var(--color-bg-primary);
+}
+
+/* ============ LAYOUT ============ */
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding-top: 7rem;
   padding-left: 24px;
   padding-right: 24px;
 }
 
-/* Section spacing */
 .section-gap {
   margin-bottom: 40px;
 }
 
-/* 12-column grid utility */
 .grid-12 {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 24px;
 }
 
-.col-span-4 { grid-column: span 4; }
-.col-span-6 { grid-column: span 6; }
-.col-span-8 { grid-column: span 8; }
+.col-span-4  { grid-column: span 4; }
+.col-span-6  { grid-column: span 6; }
+.col-span-8  { grid-column: span 8; }
 .col-span-12 { grid-column: span 12; }
 
 @media (max-width: 768px) {
@@ -322,13 +338,32 @@ input[type="range"]::-webkit-slider-thumb:hover {
   }
 }
 
-/* ============ BRANDING & WATERMARK ============ */
+/* ============ BRANDING ============ */
 .nav-logo {
   height: 32px;
   width: auto;
   object-fit: contain;
 }
 
+/* ── Chimchar AI warm glow ── */
+.chimchar-glow {
+  box-shadow: 0 0 25px rgba(255, 140, 0, 0.30);
+}
+
+/* ── Score / highlight glow ── */
+.accent-glow {
+  box-shadow: 0 0 20px rgba(255, 140, 0, 0.25);
+}
+
+/* ── Hover utility ── */
+.hover-warm {
+  transition: background 0.2s ease;
+}
+.hover-warm:hover {
+  background: rgba(255, 140, 0, 0.08);
+}
+
+/* ============ MAIN CONTAINER WATERMARK ============ */
 .main-container {
   position: relative;
   min-height: 100vh;
@@ -344,7 +379,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
   height: 500px;
   background: url('/logo.png') no-repeat center;
   background-size: contain;
-  opacity: 0.03;
+  opacity: 0.025;
   pointer-events: none;
   z-index: 0;
   filter: blur(1px) brightness(1.2);
@@ -354,7 +389,6 @@ input[type="range"]::-webkit-slider-thumb:hover {
   .main-container::before {
     width: 300px;
     height: 300px;
-    opacity: 0.025;
+    opacity: 0.02;
   }
 }
-
