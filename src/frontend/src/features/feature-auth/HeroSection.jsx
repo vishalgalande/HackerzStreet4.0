@@ -60,6 +60,7 @@ const features = [
 ]
 
 export default function HeroSection({ onSignUp, onTryDemo }) {
+  const [activeTab, setActiveTab] = useState('home')
   const containerRef = useRef(null)
   const { scrollYProgress } = useScroll({ target: containerRef, offset: ['start start', 'end start'] })
   const y1 = useTransform(scrollYProgress, [0, 1], [0, -100])
@@ -67,8 +68,34 @@ export default function HeroSection({ onSignUp, onTryDemo }) {
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0])
 
   return (
-    <div ref={containerRef} className="relative overflow-hidden">
-      {/* ===== HERO SECTION ===== */}
+    <div ref={containerRef} className="relative min-h-screen">
+      {/* Landing Page Navbar */}
+      <nav className="fixed top-0 left-0 right-0 z-50 glass border-b border-[var(--color-border)] px-4 md:px-8 py-4 flex justify-between items-center">
+        <div 
+          className="font-bold text-xl cursor-pointer"
+          onClick={() => setActiveTab('home')}
+        >
+          <span className="text-gradient">FinFix</span>
+        </div>
+        <div className="flex gap-6 items-center">
+          <button 
+            className={`text-sm font-medium transition-colors ${activeTab === 'home' ? 'text-[var(--color-gold)]' : 'text-[var(--color-text-secondary)] hover:text-white'}`}
+            onClick={() => setActiveTab('home')}
+          >
+            Home
+          </button>
+          <button 
+            className={`text-sm font-medium transition-colors ${activeTab === 'features' ? 'text-[var(--color-gold)]' : 'text-[var(--color-text-secondary)] hover:text-white'}`}
+            onClick={() => setActiveTab('features')}
+          >
+            Features
+          </button>
+        </div>
+      </nav>
+
+      {activeTab === 'home' && (
+        <>
+          {/* ===== HERO SECTION ===== */}
       <section className="min-h-screen relative flex flex-col items-center justify-center px-4 text-center animated-gradient overflow-hidden">
         {/* Parallax ambient orbs */}
         <motion.div style={{ y: y1 }} className="absolute inset-0 pointer-events-none">
@@ -126,14 +153,6 @@ export default function HeroSection({ onSignUp, onTryDemo }) {
             >
               Get Your Score →
             </motion.button>
-            <motion.button
-              onClick={() => onTryDemo?.('ravi')}
-              className="btn-secondary text-lg px-10 py-4"
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 0.97 }}
-            >
-              Try a Demo Persona
-            </motion.button>
           </motion.div>
         </motion.div>
 
@@ -178,58 +197,15 @@ export default function HeroSection({ onSignUp, onTryDemo }) {
           })}
         </div>
       </section>
+      </>
+      )}
 
-      {/* ===== PERSONA CARDS ===== */}
-      <section className="py-20 px-4" style={{ background: 'var(--color-bg-primary)' }}>
-        <div className="max-w-4xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            viewport={{ once: true }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              Meet Our <span className="text-gradient">Personas</span>
-            </h2>
-            <p className="text-[var(--color-text-secondary)]">
-              Explore real-world profiles — no login needed.
-            </p>
-          </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              { id: 'ravi', emoji: '🛵', name: 'Ravi', title: 'Delivery Partner', score: '~540', desc: '₹22k/month irregular income' },
-              { id: 'priya', emoji: '📚', name: 'Priya', title: 'College Student', score: '~480', desc: 'Part-time tutor, high savings rate' },
-              { id: 'mohan', emoji: '🏪', name: 'Mohan', title: 'Kirana Owner', score: '~620', desc: '₹35k/month, consistent bills' },
-            ].map((persona, i) => (
-              <motion.button
-                key={persona.id}
-                onClick={() => onTryDemo?.(persona.id)}
-                className="glass-card rounded-xl p-6 text-left card-tilt group"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: i * 0.1 }}
-                viewport={{ once: true }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <span className="text-4xl mb-3 inline-block">{persona.emoji}</span>
-                <h3 className="font-bold text-lg">{persona.name}</h3>
-                <p className="text-sm text-[var(--color-text-secondary)]">{persona.title}</p>
-                <p className="text-xs text-[var(--color-text-muted)] mt-1">{persona.desc}</p>
-                <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--color-border)' }}>
-                  <span className="text-sm font-semibold text-[var(--color-gold)] group-hover:underline">
-                    Score: {persona.score} — Explore →
-                  </span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
-        </div>
-      </section>
 
+      {activeTab === 'features' && (
+      <>
       {/* ===== FEATURES ===== */}
-      <section className="py-20 px-4" style={{ background: 'var(--color-bg-secondary)' }}>
+      <section className="py-24 px-4 min-h-screen" style={{ background: 'var(--color-bg-secondary)' }}>
         <div className="max-w-5xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -239,7 +215,7 @@ export default function HeroSection({ onSignUp, onTryDemo }) {
             className="text-center mb-12"
           >
             <h2 className="text-3xl md:text-4xl font-bold mb-3">
-              Why <span className="text-gradient">CreditRise</span>?
+              Why <span className="text-gradient">FinFix</span>?
             </h2>
             <p className="text-[var(--color-text-secondary)]">
               A smarter, fairer way to prove creditworthiness.
@@ -266,33 +242,10 @@ export default function HeroSection({ onSignUp, onTryDemo }) {
           </div>
         </div>
       </section>
+      </>
+      )}
 
-      {/* ===== BOTTOM CTA ===== */}
-      <section className="py-20 px-4 text-center animated-gradient relative overflow-hidden">
-        <div className="ambient-orb ambient-orb-gold absolute top-10 right-20 w-64 h-64" />
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-          viewport={{ once: true }}
-          className="relative z-10 max-w-2xl mx-auto"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Ready to Get <span className="text-gradient">Scored</span>?
-          </h2>
-          <p className="text-[var(--color-text-secondary)] mb-8">
-            Join 190M+ Indians who deserve fair credit assessment. Your behavior is your best resume.
-          </p>
-          <motion.button
-            onClick={onSignUp}
-            className="btn-primary text-lg px-10 py-4"
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Create Your Profile →
-          </motion.button>
-        </motion.div>
-      </section>
+
     </div>
   )
 }

@@ -75,7 +75,7 @@ export default function WhatIfSimulator({ originalInput, originalScore }) {
       transition={{ duration: 0.5 }}
     >
       <div className="flex items-center gap-2 mb-2">
-        <span className="text-lg text-[var(--color-gold)]">△</span>
+        <span className="text-lg text-teal-400">△</span>
         <h3 className="text-lg font-semibold">What-If Simulator</h3>
       </div>
       <p className="text-sm text-[var(--color-text-secondary)] mb-6">
@@ -148,15 +148,15 @@ export default function WhatIfSimulator({ originalInput, originalScore }) {
                   <motion.div
                     className="mx-auto rounded-lg w-14"
                     style={{
-                      background: `linear-gradient(to top, var(--color-burnt-orange), var(--color-gold))`,
+                      background: `linear-gradient(to top, rgba(20,184,166,0.2), #14b8a6)`, // Teal gradient
                       height: `${Math.max(20, ((point.score - 300) / 600) * 60)}px`,
                     }}
                     initial={{ height: 0 }}
                     animate={inView ? { height: `${Math.max(20, ((point.score - 300) / 600) * 60)}px` } : {}}
                     transition={{ duration: 0.8, delay: i * 0.15 }}
                   />
-                  <p className="text-xs font-medium mt-1" style={{ color: 'var(--color-gold)' }}>{point.score}</p>
-                  <p className="text-[10px] text-[var(--color-text-muted)]">{point.label}</p>
+                  <p className="text-xs font-medium mt-1 text-slate-900 dark:text-white">{point.score}</p>
+                  <p className="text-[10px] text-[var(--color-text-muted)] uppercase tracking-wider">{point.label}</p>
                 </div>
               ))}
             </div>
@@ -175,7 +175,7 @@ function SliderInput({ label, value, min, max, step, onChange }) {
       <div className="flex justify-between text-sm mb-1.5">
         <span className="text-[var(--color-text-secondary)]">{label}</span>
         <motion.span
-          className="font-medium text-[var(--color-gold)]"
+          className="font-medium text-[var(--color-text-primary)]"
           key={value}
           initial={{ scale: 1.1 }}
           animate={{ scale: 1 }}
@@ -191,9 +191,9 @@ function SliderInput({ label, value, min, max, step, onChange }) {
         step={step}
         value={value}
         onChange={(e) => onChange(parseFloat(e.target.value))}
-        className="w-full h-1.5 rounded-lg appearance-none cursor-pointer"
+        className="w-full h-1 rounded-lg appearance-none cursor-pointer"
         style={{
-          background: `linear-gradient(to right, var(--color-burnt-orange) 0%, var(--color-gold) ${percent}%, var(--color-bg-elevated) ${percent}%)`,
+          background: `linear-gradient(to right, #14b8a6 0%, #14b8a6 ${percent}%, var(--color-bg-elevated) ${percent}%)`,
         }}
       />
     </div>

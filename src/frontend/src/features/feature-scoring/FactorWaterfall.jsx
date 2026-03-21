@@ -31,18 +31,17 @@ export default function FactorWaterfall({ factors, language = 'en' }) {
       <div className="space-y-4">
         {sortedFactors.map((factor, i) => {
           const barWidth = (Math.abs(factor.points) / maxAbs) * 100
-          const barColor = factor.is_positive ? '#10B981' : '#b83a2a'
-          const bgColor = factor.is_positive ? 'rgba(16, 185, 129, 0.1)' : 'rgba(184, 58, 42, 0.1)'
+          const barColor = factor.is_positive ? '#14b8a6' : '#f43f5e' // Teal/Rose
 
           return (
             <motion.div
               key={factor.factor}
-              initial={{ opacity: 0, x: -20 }}
+              initial={{ opacity: 0, x: -10 }}
               animate={inView ? { opacity: 1, x: 0 } : {}}
-              transition={{ duration: 0.4, delay: i * 0.08 }}
+              transition={{ duration: 0.4, delay: i * 0.05 }}
             >
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-sm font-medium">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-[var(--color-text-primary)]">
                   {language === 'hi' ? factor.label_hi : factor.label}
                 </span>
                 <span className="text-sm font-bold" style={{ color: barColor }}>
@@ -50,13 +49,10 @@ export default function FactorWaterfall({ factors, language = 'en' }) {
                 </span>
               </div>
 
-              <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
+              <div className="h-1.5 rounded-full overflow-hidden bg-slate-100 dark:bg-[rgba(30,41,59,0.5)]">
                 <motion.div
                   className="h-full rounded-full"
-                  style={{
-                    background: `linear-gradient(90deg, ${barColor}cc, ${barColor})`,
-                    boxShadow: `0 0 8px ${barColor}40`,
-                  }}
+                  style={{ backgroundColor: barColor }}
                   initial={{ width: 0 }}
                   animate={inView ? { width: `${barWidth}%` } : { width: 0 }}
                   transition={{ duration: 0.8, delay: i * 0.1 + 0.2, ease: [0.4, 0, 0.2, 1] }}

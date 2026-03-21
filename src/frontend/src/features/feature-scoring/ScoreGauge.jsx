@@ -53,29 +53,28 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* Arc gradient */}
+            {/* Arc gradient - Luminous Teal to Cyan */}
             <linearGradient id="arcGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#c4652a" />
-              <stop offset="50%" stopColor={gaugeColor} />
-              <stop offset="100%" stopColor="#d4a843" />
+              <stop offset="0%" stopColor="#14b8a6" />
+              <stop offset="100%" stopColor="#06b6d4" />
             </linearGradient>
           </defs>
 
-          {/* Background arc */}
+          {/* Background arc - delicate 2px line */}
           <path
             d="M 10 100 A 90 90 0 0 1 190 100"
             fill="none"
             stroke="var(--color-bg-elevated)"
-            strokeWidth="10"
+            strokeWidth="2"
             strokeLinecap="round"
           />
 
-          {/* Score arc with glow */}
+          {/* Score arc with glow - 4px line */}
           <motion.path
             d="M 10 100 A 90 90 0 0 1 190 100"
             fill="none"
             stroke="url(#arcGradient)"
-            strokeWidth="10"
+            strokeWidth="4"
             strokeLinecap="round"
             strokeDasharray={halfCircumference}
             initial={{ strokeDashoffset: halfCircumference }}
@@ -100,14 +99,10 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
           })}
         </svg>
 
-        {/* Score number overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-end pb-2">
+        {/* Score number overlay - Massive, stark, neutral */}
+        <div className="absolute inset-0 flex flex-col items-center justify-end pb-3">
           <motion.span
-            className={`font-bold ${isLarge ? 'text-5xl' : 'text-4xl'}`}
-            style={{ 
-              color: gaugeColor,
-              textShadow: `0 0 20px ${gaugeColor}40`,
-            }}
+            className={`font-bold tracking-tight text-[var(--color-text-primary)] ${isLarge ? 'text-7xl' : 'text-5xl'}`}
             key={displayScore}
           >
             {displayScore}
@@ -117,7 +112,7 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
 
       {/* Band label */}
       <motion.div
-        className="mt-3 px-5 py-1.5 rounded-full text-sm font-semibold"
+        className="mt-4 px-4 py-1 rounded-full text-xs font-semibold tracking-wide"
         style={{
           backgroundColor: `${gaugeColor}15`,
           color: gaugeColor,
@@ -130,8 +125,8 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
         {band}
       </motion.div>
 
-      {/* Confidence + Benchmark */}
-      <div className="flex gap-6 mt-4 text-sm text-[var(--color-text-secondary)]">
+      {/* Confidence + Benchmark - System Labels */}
+      <div className="flex gap-6 mt-5 system-label">
         {confidenceMargin && (
           <span>Confidence: ±{confidenceMargin} pts</span>
         )}
