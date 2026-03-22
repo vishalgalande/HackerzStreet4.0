@@ -40,7 +40,7 @@ function fmtDate(d) {
 
 export default function ActivePayments() {
   const { profile } = useAuth()
-  const { payments, addPayment, removePayment, stats, getNextDueDate, getMonthlyAmount, getOutstanding, getCategoryIcon } = usePayments()
+  const { payments, loading, addPayment, removePayment, stats, getNextDueDate, getMonthlyAmount, getOutstanding, getCategoryIcon } = usePayments()
   const [activeTab, setActiveTab] = useState('all')
   const [showForm, setShowForm] = useState(false)
   const [paymentType, setPaymentType] = useState(null)
@@ -49,7 +49,7 @@ export default function ActivePayments() {
   const [insightLoading, setInsightLoading] = useState(false)
 
   const [loanForm, setLoanForm] = useState({
-    preset: 'personal', name: '', amount: '', emi: '', interest_rate: '',
+    preset: 'personal', name: '', amount: '', interest_rate: '',
     tenure_months: '', start_date: new Date().toISOString().split('T')[0], bank_name: '',
   })
   const [ccForm, setCcForm] = useState({
@@ -58,6 +58,18 @@ export default function ActivePayments() {
   const [billForm, setBillForm] = useState({
     name: '', category: 'utility', avg_amount: '', due_date: '', auto_pay: false,
   })
+
+  function calcEMI(principal, annualRate, months) {
+    const P = parseFloat(principal) || 0
+    const n = parseInt(months) || 0
+    const annR = parseFloat(annualRate) || 0
+    if (P <= 0 || n <= 0) return 0
+    if (annR <= 0) return Math.round(P / n)
+    const r = annR / 12 / 100
+    return Math.round(P * r * Math.pow(1 + r, n) / (Math.pow(1 + r, n) - 1))
+  }
+
+  const computedEMI = calcEMI(loanForm.amount, loanForm.interest_rate, loanForm.tenure_months)
 
   const filtered = activeTab === 'all' ? payments : payments.filter(p => p.type === activeTab)
 
@@ -68,13 +80,13 @@ export default function ActivePayments() {
       name: loanForm.name || preset?.label || 'Unnamed Loan',
       icon: preset?.icon || '💰',
       amount: parseFloat(loanForm.amount) || 0,
-      emi: parseFloat(loanForm.emi) || 0,
+      emi: computedEMI,
       interest_rate: parseFloat(loanForm.interest_rate) || 0,
       tenure_months: parseInt(loanForm.tenure_months) || 12,
       start_date: loanForm.start_date,
       bank_name: loanForm.bank_name || preset?.label || '',
     })
-    setLoanForm({ preset: 'personal', name: '', amount: '', emi: '', interest_rate: '', tenure_months: '', start_date: new Date().toISOString().split('T')[0], bank_name: '' })
+    setLoanForm({ preset: 'personal', name: '', amount: '', interest_rate: '', tenure_months: '', start_date: new Date().toISOString().split('T')[0], bank_name: '' })
     closeForm()
   }
 
@@ -173,7 +185,17 @@ export default function ActivePayments() {
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
-          {[
+          {loading ? (
+            [1,2,3].map(i => (
+              <div key={i} className="bg-neutral-900 border border-white/5 rounded-3xl" style={{ padding: '24px' }}>
+              <motion.div animate={{ opacity: [0.3, 0.6, 0.3] }} transition={{ duration: 1.5, repeat: Infinity, delay: i * 0.15 }}>
+                  <div style={{ height: '14px', width: '80px', borderRadius: '6px', background: '#262626', marginBottom: '14px' }} />
+                  <div style={{ height: '24px', width: '120px', borderRadius: '8px', background: '#262626', marginBottom: '8px' }} />
+                  <span className="text-neutral-600" style={{ fontSize: '11px', fontWeight: 500 }}>Loading…</span>
+                </motion.div>
+              </div>
+            ))
+          ) : [
             { label: 'Monthly Outflow', value: fmtCurrency(stats.totalMonthly), icon: '📅' },
             { label: 'Outstanding Debt', value: fmtCurrency(stats.totalOutstanding), icon: '💰' },
             { label: 'Next Payment', value: nextDueDate ? fmtDate(nextDueDate) : 'None', icon: '⏰', sub: nextDuePayment?.name },
@@ -271,8 +293,8 @@ export default function ActivePayments() {
                         <input type="number" value={loanForm.amount} onChange={e => setLoanForm({ ...loanForm, amount: e.target.value })} placeholder="500000" style={inputStyle} />
                       </div>
                       <div>
-                        <label style={labelStyle}>EMI (₹/mo)</label>
-                        <input type="number" value={loanForm.emi} onChange={e => setLoanForm({ ...loanForm, emi: e.target.value })} placeholder="12000" style={inputStyle} />
+                        <label style={labelStyle}>EMI (₹/mo) — Auto</label>
+                        <input type="text" readOnly value={computedEMI > 0 ? `₹${computedEMI.toLocaleString('en-IN')}` : '—'} style={{ ...inputStyle, color: computedEMI > 0 ? '#34d399' : '#525252', cursor: 'default', borderColor: computedEMI > 0 ? 'rgba(16,185,129,0.3)' : '#262626' }} />
                       </div>
                       <div>
                         <label style={labelStyle}>Interest (%)</label>
@@ -291,13 +313,13 @@ export default function ActivePayments() {
                     </div>
                     <motion.button
                       onClick={handleAddLoan}
-                      disabled={!loanForm.amount || !loanForm.emi || !loanForm.tenure_months}
+                      disabled={!loanForm.amount || !loanForm.tenure_months || computedEMI <= 0}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       style={{
                         width: '100%', padding: '14px', borderRadius: '12px', fontWeight: 600, fontSize: '15px',
                         background: 'linear-gradient(135deg, #FF8C00, #FFC857)', color: '#0a0a0a', border: 'none', cursor: 'pointer',
-                        opacity: (!loanForm.amount || !loanForm.emi || !loanForm.tenure_months) ? 0.4 : 1,
+                        opacity: (!loanForm.amount || !loanForm.tenure_months || computedEMI <= 0) ? 0.4 : 1,
                       }}
                     >
                       Add Loan

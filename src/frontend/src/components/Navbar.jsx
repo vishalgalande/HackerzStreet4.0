@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '◎' },
   { id: 'chimchar', label: 'Chimchar AI', icon: '🔥' },
-  { id: 'credit-engine', label: 'Credit Engine', icon: '⚡' },
   { id: 'lender-dashboard', label: 'Active Payments', icon: '🏦' },
   { id: 'savings', label: 'Savings', icon: '◇' },
   { id: 'anti-impulse', label: 'Anti Impulse', icon: '◷' },

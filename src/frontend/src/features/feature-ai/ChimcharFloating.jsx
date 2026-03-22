@@ -1,33 +1,70 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../feature-auth/AuthContext'
+import usePayments from '../feature-payments/usePayments'
+
+const API = import.meta.env.VITE_API_URL || ''
 
 export default function ChimcharFloating() {
   const [isOpen, setIsOpen] = useState(false)
   const [activeTab, setActiveTab] = useState('chat')
   const [messages, setMessages] = useState([
-    { id: '1', role: 'assistant', text: "Hey! I'm Chimchar 🔥, your financial guide. How can I help you today?" }
+    { id: '1', role: 'assistant', text: "Hey! I'm Chimchar 🔥, your financial guide. Ask me anything about credit scores, savings, or investments!" }
   ])
   const [inputVal, setInputVal] = useState('')
   const [isTyping, setIsTyping] = useState(false)
   const messagesEndRef = useRef(null)
+  const { profile } = useAuth()
+  const { payments, stats } = usePayments()
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, isTyping, activeTab, isOpen])
 
-  const handleSend = (e) => {
+  const handleSend = async (e) => {
     e.preventDefault()
-    if (!inputVal.trim()) return
-    
-    setMessages(p => [...p, { id: Date.now().toString(), role: 'user', text: inputVal }])
+    if (!inputVal.trim() || isTyping) return
+
+    const userMsg = inputVal.trim()
+    setMessages(p => [...p, { id: Date.now().toString(), role: 'user', text: userMsg }])
     setInputVal('')
     setIsTyping(true)
-    
-    setTimeout(() => {
+
+    const loans = payments.filter(p => p.type === 'loan')
+    const ccs = payments.filter(p => p.type === 'cc')
+    const bills = payments.filter(p => p.type === 'bill')
+
+    const enrichedProfile = {
+      ...(profile || {}),
+      monthly_income: profile?.monthly_income || profile?.income_amount || 0,
+      existing_debt: stats.totalMonthly || 0,
+      loans: loans.map(l => `${l.name}: ₹${l.amount} at ${l.interest_rate}%, EMI ₹${l.emi}/mo`),
+      credit_cards: ccs.map(c => `${c.name}: Limit ₹${c.credit_limit}, Balance ₹${c.current_balance}, ${c.credit_limit > 0 ? Math.round(c.current_balance / c.credit_limit * 100) : 0}% utilization`),
+      recurring_bills: bills.map(b => `${b.name} (${b.category}): ₹${b.avg_amount}/mo${b.auto_pay ? ', auto-pay on' : ''}`),
+      total_monthly_outflow: stats.totalMonthly || 0,
+      total_outstanding_debt: stats.totalOutstanding || 0,
+      payment_count: payments.length,
+    }
+
+    try {
+      const history = messages.slice(-10).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: m.text }))
+      const res = await fetch(`${API}/api/chat`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: userMsg,
+          history,
+          profile: enrichedProfile,
+          language: 'en',
+        }),
+      })
+      const data = await res.json()
+      setMessages(p => [...p, { id: (Date.now()+1).toString(), role: 'assistant', text: data.reply || "I couldn't process that. Try again!" }])
+    } catch {
+      setMessages(p => [...p, { id: (Date.now()+1).toString(), role: 'assistant', text: "Connection error. Please check your network and try again." }])
+    } finally {
       setIsTyping(false)
-      setMessages(p => [...p, { id: (Date.now()+1).toString(), role: 'assistant', text: "I'm analyzing your profile to provide the best strategy. In the meantime, check out my Suggestions tab for quick wins!" }])
-    }, 1200)
+    }
   }
 
   return (

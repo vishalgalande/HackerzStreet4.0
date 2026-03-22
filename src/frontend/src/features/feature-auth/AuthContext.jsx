@@ -149,7 +149,20 @@ export function AuthProvider({ children }) {
 
   async function signUp(email, password) {
     const { data, error } = await supabase.auth.signUp({ email, password })
-    return { data, error }
+
+    if (error) {
+      let message = error.message
+      if (message.toLowerCase().includes('rate limit') || error.status === 429) {
+        message = 'Too many sign-up attempts. Please wait a few minutes and try again.'
+      }
+      return { data, error: { ...error, message } }
+    }
+
+    if (data?.user?.identities?.length === 0) {
+      return { data: null, error: { message: 'An account with this email already exists. Please sign in instead.' } }
+    }
+
+    return { data, error: null }
   }
 
   async function signIn(email, password) {

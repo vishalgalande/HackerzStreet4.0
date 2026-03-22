@@ -25,8 +25,6 @@ GEMINI_URL = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_M
 router = APIRouter(prefix="/api")
 
 
-# ── AI Insights endpoint ──
-
 class LoanInsightItem(BaseModel):
     name: str = ""
     amount: float = 0
@@ -36,57 +34,99 @@ class LoanInsightItem(BaseModel):
     completed_months: int = 0
     status: str = "active"
 
+class CCInsightItem(BaseModel):
+    name: str = ""
+    credit_limit: float = 0
+    current_balance: float = 0
+    min_payment: float = 0
+    due_date: str = ""
+
+class BillInsightItem(BaseModel):
+    name: str = ""
+    category: str = ""
+    avg_amount: float = 0
+    auto_pay: bool = False
+
 class LoanInsightsRequest(BaseModel):
     loans: list[LoanInsightItem] = []
+    credit_cards: list[CCInsightItem] = []
+    bills: list[BillInsightItem] = []
     monthly_income: float = 0
 
 
-LOAN_SYSTEM_PROMPT = """You are a senior financial advisor AI built into a credit assessment tool. Analyze the user's loan portfolio and give brief, actionable insights.
+LOAN_SYSTEM_PROMPT = """You are a senior financial advisor AI built into an alternative credit scoring tool called FinFix. Analyze the user's complete payment portfolio (loans, credit cards, and recurring bills) and give brief, actionable insights.
+
+CRITICAL FORMATTING RULE — you MUST prefix EVERY line with exactly one of these tags:
+[POSITIVE] — for things the user is doing well (low risk, good ratios, on track)
+[WARNING] — for risks and concerns (high utilization, missed payments, high DTI)
+[ACTION] — for specific next steps (prepay X, reduce Y, set up auto-pay)
 
 Rules:
-- Be concise: 3-5 bullet points max, each 1-2 sentences.
+- Exactly 4-6 tagged lines. Each line is 1-2 sentences.
 - Use ₹ for currency. Reference Indian financial context.
-- Focus on: prepayment strategy, risk factors, timeline optimization, and credit score impact.
-- If loans are nearly complete, congratulate. If debt-to-income is high, warn kindly.
-- Format as clean bullet points using • symbol. No headers or markdown.
-- Keep the total response under 200 words.
+- Cover: debt health, CC utilization, bill automation, prepayment strategy, and credit score impact.
+- If debt-to-income is below 30%, praise it. If CC utilization is above 30%, warn.
+- If bills lack auto-pay, recommend setting it up.
+- Keep the total response under 250 words.
+- Do NOT use bullet symbols, headers, or markdown. Just the tagged lines, one per line.
 """
 
 
 @router.post("/loans/insights")
 async def get_loan_insights(req: LoanInsightsRequest):
-    """AI-powered loan portfolio insights using Gemini."""
     if not GEMINI_API_KEY:
         return {"insight": "AI insights unavailable — GEMINI_API_KEY not set.", "error": "no_api_key"}
 
-    if not req.loans:
-        return {"insight": "Add loans to your portfolio to get AI insights.", "error": None}
+    if not req.loans and not req.credit_cards and not req.bills:
+        return {"insight": "Add payments to your portfolio to get AI insights.", "error": None}
 
-    # Build context from loans
-    loan_lines = []
+    sections = []
     total_emi = 0
-    for i, loan in enumerate(req.loans, 1):
-        remaining = loan.tenure_months - loan.completed_months
-        progress = round((loan.completed_months / loan.tenure_months * 100) if loan.tenure_months > 0 else 0)
-        loan_lines.append(
-            f"  {i}. {loan.name or 'Unnamed Loan'}: ₹{loan.amount:,.0f} at {loan.interest_rate}% "
-            f"| EMI: ₹{loan.emi:,.0f}/mo | {loan.completed_months}/{loan.tenure_months} months done ({progress}%) "
-            f"| {remaining} months remaining | Status: {loan.status}"
-        )
-        total_emi += loan.emi
+
+    if req.loans:
+        loan_lines = []
+        for i, loan in enumerate(req.loans, 1):
+            remaining = loan.tenure_months - loan.completed_months
+            progress = round((loan.completed_months / loan.tenure_months * 100) if loan.tenure_months > 0 else 0)
+            loan_lines.append(
+                f"  {i}. {loan.name or 'Unnamed Loan'}: ₹{loan.amount:,.0f} at {loan.interest_rate}% "
+                f"| EMI: ₹{loan.emi:,.0f}/mo | {loan.completed_months}/{loan.tenure_months} months ({progress}%) "
+                f"| {remaining} remaining | Status: {loan.status}"
+            )
+            total_emi += loan.emi
+        sections.append(f"LOANS:\n{chr(10).join(loan_lines)}")
+
+    if req.credit_cards:
+        cc_lines = []
+        for i, cc in enumerate(req.credit_cards, 1):
+            util = round(cc.current_balance / cc.credit_limit * 100) if cc.credit_limit > 0 else 0
+            cc_lines.append(
+                f"  {i}. {cc.name}: Limit ₹{cc.credit_limit:,.0f} | Balance ₹{cc.current_balance:,.0f} "
+                f"| Utilization {util}% | Min Payment ₹{cc.min_payment:,.0f}"
+            )
+            total_emi += cc.min_payment
+        sections.append(f"CREDIT CARDS:\n{chr(10).join(cc_lines)}")
+
+    if req.bills:
+        bill_lines = []
+        for i, bill in enumerate(req.bills, 1):
+            bill_lines.append(
+                f"  {i}. {bill.name} ({bill.category}): ₹{bill.avg_amount:,.0f}/mo | Auto-pay: {'Yes' if bill.auto_pay else 'No'}"
+            )
+            total_emi += bill.avg_amount
+        sections.append(f"RECURRING BILLS:\n{chr(10).join(bill_lines)}")
 
     dti = round((total_emi / req.monthly_income * 100) if req.monthly_income > 0 else 0)
 
-    context = f"""LOAN PORTFOLIO:
-{chr(10).join(loan_lines)}
+    context = f"""{chr(10).join(sections)}
 
 SUMMARY:
-- Total monthly EMI: ₹{total_emi:,.0f}
+- Total monthly outflow: ₹{total_emi:,.0f}
 - Monthly income: ₹{req.monthly_income:,.0f}
 - Debt-to-income ratio: {dti}%
-- Number of active loans: {len(req.loans)}
+- Active loans: {len(req.loans)} | Credit cards: {len(req.credit_cards)} | Bills: {len(req.bills)}
 
-Provide concise, actionable insights for this borrower."""
+Analyze this portfolio and provide tagged insights."""
 
     payload = {
         "system_instruction": {"parts": [{"text": LOAN_SYSTEM_PROMPT}]},

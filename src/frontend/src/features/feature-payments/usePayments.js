@@ -1,29 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '../feature-auth/AuthContext'
 
+const API = import.meta.env.VITE_API_URL || ''
 const LS_KEY = 'finfix_payments'
-const OLD_LOANS_KEY = 'finfix_user_loans'
-
-function loadPayments() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') } catch { return [] }
-}
-
-function savePayments(payments) {
-  localStorage.setItem(LS_KEY, JSON.stringify(payments))
-}
-
-function migrateOldLoans() {
-  try {
-    const old = JSON.parse(localStorage.getItem(OLD_LOANS_KEY) || '[]')
-    if (old.length === 0) return []
-    const migrated = old.map(loan => ({
-      ...loan,
-      type: 'loan',
-      bank_name: loan.name || 'Unknown',
-    }))
-    localStorage.removeItem(OLD_LOANS_KEY)
-    return migrated
-  } catch { return [] }
-}
 
 function getDueDay(payment) {
   if (payment.type === 'loan' && payment.start_date) {
@@ -84,40 +63,77 @@ function getCategoryIcon(payment) {
 }
 
 export default function usePayments() {
+  const { getToken } = useAuth()
   const [payments, setPayments] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  const fetchPayments = useCallback(async () => {
+    const token = getToken()
+    if (!token) {
+      setPayments([])
+      setLoading(false)
+      return
+    }
+    try {
+      const res = await fetch(`${API}/api/payments`, {
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setPayments(data.payments || [])
+      } else {
+        setPayments([])
+      }
+    } catch {
+      try {
+        const stored = JSON.parse(localStorage.getItem(LS_KEY) || '[]')
+        setPayments(stored)
+      } catch { setPayments([]) }
+    } finally {
+      setLoading(false)
+    }
+  }, [getToken])
 
   useEffect(() => {
-    let existing = loadPayments()
-    if (existing.length === 0) {
-      const migrated = migrateOldLoans()
-      if (migrated.length > 0) {
-        existing = migrated
-        savePayments(existing)
+    fetchPayments()
+  }, [fetchPayments])
+
+  const addPayment = useCallback(async (data) => {
+    const token = getToken()
+    if (!token) return
+    try {
+      const res = await fetch(`${API}/api/payments`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      })
+      if (res.ok) {
+        const result = await res.json()
+        setPayments(prev => [result.payment, ...prev])
       }
+    } catch {
+      const newPayment = { ...data, id: `${data.type}_${Date.now()}`, created_at: new Date().toISOString() }
+      setPayments(prev => {
+        const updated = [newPayment, ...prev]
+        localStorage.setItem(LS_KEY, JSON.stringify(updated))
+        return updated
+      })
     }
-    setPayments(existing)
-  }, [])
+  }, [getToken])
 
-  const addPayment = useCallback((data) => {
-    const newPayment = {
-      ...data,
-      id: `${data.type}_${Date.now()}`,
-      created_at: new Date().toISOString(),
-    }
-    setPayments(prev => {
-      const updated = [...prev, newPayment]
-      savePayments(updated)
-      return updated
-    })
-  }, [])
-
-  const removePayment = useCallback((id) => {
-    setPayments(prev => {
-      const updated = prev.filter(p => p.id !== id)
-      savePayments(updated)
-      return updated
-    })
-  }, [])
+  const removePayment = useCallback(async (id) => {
+    const token = getToken()
+    setPayments(prev => prev.filter(p => p.id !== id))
+    try {
+      await fetch(`${API}/api/payments/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+    } catch {}
+  }, [getToken])
 
   const getUpcoming = useCallback((limit = 5) => {
     return [...payments]
@@ -139,5 +155,5 @@ export default function usePayments() {
       : null,
   }
 
-  return { payments, addPayment, removePayment, getUpcoming, stats, getNextDueDate, getMonthlyAmount, getOutstanding, getCategoryIcon }
+  return { payments, loading, addPayment, removePayment, getUpcoming, stats, getNextDueDate, getMonthlyAmount, getOutstanding, getCategoryIcon, refetch: fetchPayments }
 }
