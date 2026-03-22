@@ -64,6 +64,7 @@ function AppContent() {
   const [view, setView] = useState('home') // home | auth | app
   const [activePage, setActivePage] = useState('dashboard')
   const [language, setLanguage] = useState('en')
+  const [authMode, setAuthMode] = useState('login') // login | signup
 
   // Loading state
   if (loading) {
@@ -114,7 +115,7 @@ function AppContent() {
         >
           ← Back
         </motion.button>
-        <AuthPage />
+        <AuthPage initialMode={authMode} />
       </div>
     )
   }
@@ -122,7 +123,8 @@ function AppContent() {
   // Default: Landing page
   return (
     <HeroSection
-      onSignUp={() => setView('auth')}
+      onSignIn={() => { setAuthMode('login'); setView('auth') }}
+      onSignUp={() => { setAuthMode('signup'); setView('auth') }}
     />
   )
 }

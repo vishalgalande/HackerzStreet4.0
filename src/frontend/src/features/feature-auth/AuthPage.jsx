@@ -8,14 +8,15 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from './AuthContext'
 
-export default function AuthPage() {
+export default function AuthPage({ initialMode = 'login' }) {
   const { signIn, signUp } = useAuth()
-  const [isLogin, setIsLogin] = useState(true)
+  const [isLogin, setIsLogin] = useState(initialMode === 'login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [signupSuccess, setSignupSuccess] = useState(false)
 
   async function handleSubmit(e) {
     e.preventDefault()
@@ -28,6 +29,9 @@ export default function AuthPage() {
 
     if (authError) {
       setError(authError.message)
+    } else if (!isLogin) {
+      // Signup succeeded — show verification message
+      setSignupSuccess(true)
     }
 
     setLoading(false)
@@ -103,12 +107,42 @@ export default function AuthPage() {
 
       {/* Auth Card */}
       <motion.div
-        key={isLogin ? 'login' : 'signup'}
+        key={signupSuccess ? 'success' : isLogin ? 'login' : 'signup'}
         initial={{ opacity: 0, y: 20, scale: 0.98 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
         transition={{ duration: 0.4, ease: [0.4, 0, 0.2, 1] }}
         style={cardStyle}
       >
+        {signupSuccess ? (
+          /* ── Email Verification Notice ── */
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📧</div>
+            <h2 style={{ fontSize: '24px', fontWeight: 800, color: '#EDEDED', marginBottom: '12px' }}>
+              Verify Your Email
+            </h2>
+            <p style={{ color: '#999', fontSize: '15px', lineHeight: '1.6', marginBottom: '8px' }}>
+              We've sent a verification link to
+            </p>
+            <p style={{ color: '#FFC857', fontSize: '15px', fontWeight: 600, marginBottom: '20px' }}>
+              {email}
+            </p>
+            <p style={{ color: '#888', fontSize: '14px', lineHeight: '1.6', marginBottom: '28px' }}>
+              Please check your inbox (and spam folder) and click the link to verify your account.
+              You must verify your email before you can log in.
+            </p>
+            <button
+              onClick={() => { setSignupSuccess(false); setIsLogin(true); setError(''); setPassword('') }}
+              style={{
+                width: '100%', padding: '14px', borderRadius: '12px', border: 'none',
+                background: 'linear-gradient(135deg, #FF8C00, #FFC857)',
+                color: '#0B0B0B', fontSize: '15px', fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Go to Sign In →
+            </button>
+          </div>
+        ) : (
+        <>
         {/* Heading */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <h1 style={{ fontSize: '28px', fontWeight: 800, color: '#EDEDED', marginBottom: '8px' }}>
@@ -277,6 +311,8 @@ export default function AuthPage() {
             {isLogin ? 'Create one' : 'Sign in'}
           </button>
         </div>
+        </>
+        )}
       </motion.div>
 
       {/* Footer hint */}
