@@ -194,7 +194,7 @@ function TrendChart({ data }) {
   )
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onNavigate }) {
   const { user, profile, getToken, signOut } = useAuth()
   const [activeTab, setActiveTab] = useState('overview')
   const [entries, setEntries] = useState(() => loadEntries())
@@ -294,15 +294,34 @@ export default function Dashboard() {
     ]
   }, [entries])
 
-  // Recommendations
-  const recommendations = useMemo(() => {
-    if (backendScore?.recommendations) return backendScore.recommendations
-    return [
-      { action: 'Pay all bills on time for 3 months', action_hi: '3 महीने तक सभी बिल समय पर भुगतान करें', impact_min: 15, impact_max: 25, effort: 'medium', timeframe: '90 days', explanation: 'Payment history is the strongest predictor of credit.', explanation_hi: 'भुगतान इतिहास क्रेडिट का सबसे मजबूत भविष्यवक्ता है।' },
-      { action: 'Increase savings to 20% of income', action_hi: 'बचत को आय के 20% तक बढ़ाएं', impact_min: 10, impact_max: 18, effort: 'medium', timeframe: '3 months', explanation: 'Higher savings ratio signals financial resilience.', explanation_hi: 'उच्च बचत अनुपात वित्तीय लचीलापन दर्शाता है।' },
-      { action: 'Reduce discretionary spending below 15%', action_hi: 'विवेकाधीन खर्च 15% से नीचे कम करें', impact_min: 8, impact_max: 14, effort: 'low', timeframe: '30 days', explanation: 'Lower discretionary ratio indicates financial maturity.', explanation_hi: 'कम विवेकाधीन अनुपात वित्तीय परिपक्वता दर्शाता है।' },
-    ]
-  }, [backendScore])
+  // Dynamic Quick Improvements — built from user data
+  const quickImprovements = useMemo(() => {
+    const items = []
+    const missedPayments = entries.filter(e => !e.bill_paid_on_time).length
+    const income = profile?.monthly_income || 25000
+    const totalSavings = entries.reduce((s, e) => s + (e.savings || 0), 0)
+    const savingsRate = income > 0 ? Math.round((totalSavings / Math.max(entries.length, 1)) / income * 100) : 0
+
+    items.push({
+      title: missedPayments > 0 ? 'Pay outstanding bills on time' : 'Keep paying all bills on time',
+      impact: '+15–25 pts',
+      timeframe: '90 days',
+      page: 'lender-dashboard',
+      icon: '💳',
+    })
+
+    if (savingsRate < 20) {
+      items.push({
+        title: `Boost savings rate to 20%${savingsRate > 0 ? ` (currently ${savingsRate}%)` : ''}`,
+        impact: '+10–18 pts',
+        timeframe: '3 months',
+        page: 'savings',
+        icon: '💰',
+      })
+    }
+
+    return items
+  }, [entries, profile])
 
   function handleEntrySaved(newEntry) {
     setShowEntryForm(false)
@@ -378,63 +397,35 @@ export default function Dashboard() {
   const totalDebt = profile?.existing_debt || 0
 
   return (
-    <div className="page-container pb-16" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-      
-      {/* TOP SECTION: Horizontal Card for Selectors & Actions */}
-      <div className="bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-5 md:p-6 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-5 w-full md:w-auto overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-          <div className="flex items-center gap-3 shrink-0">
-            <span className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider">Profile:</span>
-            <select value={occupation} onChange={(e) => setOccupation(e.target.value)} className="bg-slate-800/50 border border-slate-700 text-slate-200 text-[15px] rounded-lg px-4 py-2 focus:ring-1 focus:ring-teal-500 outline-none cursor-pointer hover:bg-slate-700 transition-colors">
-              {occupations.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-            </select>
-          </div>
-          <div className="w-px h-7 bg-slate-700 shrink-0 hidden md:block" />
-          <div className="flex items-center gap-1.5 bg-slate-800/30 p-1.5 rounded-lg border border-slate-700/50 shrink-0">
-            {timelines.map(t => (
-              <button key={t.value} onClick={() => setTimeline(t.value)} className={`px-4 py-1.5 text-[13px] font-medium rounded-md transition-all ${timeline === t.value ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
-                {t.label}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className="flex items-center gap-3 shrink-0">
-          <button onClick={() => setShowEntryForm(true)} className="px-4 py-2 rounded-lg text-sm font-medium border border-[#FF8C00]/40 text-[#FFC857] hover:bg-[#FF8C00]/10 transition-colors">
-            Log Today
-          </button>
-          <button onClick={computeBackendScore} disabled={computing} className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-br from-[#FF8C00] to-[#FFC857] text-black hover:opacity-90 transition-opacity">
-            {computing ? 'Computing...' : 'Refresh Score'}
-          </button>
-        </div>
-      </div>
+    <div className="page-container pb-16" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
-      {/* ROW 1: 3 Cards (Bills, Score Gauge, Tips) */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      {/* ROW 1: 3 Cards (Bills, Score Gauge, Quick Improvements) */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Bills & Loans */}
-        <div className="lg:col-span-4 xl:col-span-3 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 flex flex-col justify-between hover:border-slate-700 transition-colors">
+        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 flex flex-col justify-between hover:border-[#FF8C00]/20 transition-colors">
           <div>
-            <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+            <h3 className="text-[13px] font-semibold text-neutral-500 uppercase tracking-wider mb-6 flex items-center gap-2">
               <span className="text-base">◎</span> Bills & Loans
             </h3>
             <div className="space-y-6">
               <div>
-                <p className="text-[13px] text-slate-400 mb-1.5">On-time History</p>
-                <p className="text-3xl font-bold text-emerald-400 tracking-tight">{billsOnTime}</p>
+                <p className="text-[13px] text-neutral-500 mb-1.5">On-time History</p>
+                <p className="text-3xl font-bold text-[#FFC857] tracking-tight">{billsOnTime}</p>
               </div>
-              <div className="w-full h-px bg-slate-800/50" />
+              <div className="w-full h-px bg-white/[0.05]" />
               <div>
-                <p className="text-[13px] text-slate-400 mb-1.5">Active Debt Profile</p>
-                <p className="text-2xl font-medium text-slate-200 tracking-tight">₹{totalDebt.toLocaleString()}</p>
+                <p className="text-[13px] text-neutral-500 mb-1.5">Active Debt Profile</p>
+                <p className="text-2xl font-medium text-neutral-200 tracking-tight">₹{totalDebt.toLocaleString()}</p>
               </div>
             </div>
           </div>
-          <p className="text-[13px] text-slate-500 mt-8 leading-relaxed">Derived from {entries.length} registered entries.</p>
+          <p className="text-[13px] text-neutral-600 mt-8 leading-relaxed">Derived from {entries.length} registered entries.</p>
         </div>
 
         {/* Central Score Gauge */}
-        <div className="lg:col-span-4 xl:col-span-6 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[380px] hover:shadow-[0_0_40px_rgba(20,184,166,0.05)] transition-shadow group">
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-1000" style={{ background: scoreResult.color }} />
+        <div className="lg:col-span-6 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 relative overflow-hidden flex flex-col items-center justify-center min-h-[380px] hover:shadow-[0_0_40px_rgba(255,140,0,0.05)] transition-shadow group">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 rounded-full opacity-0 group-hover:opacity-10 blur-3xl transition-opacity duration-1000" style={{ background: '#FF8C00' }} />
           
           <ScoreGauge
             score={scoreResult.score}
@@ -447,31 +438,51 @@ export default function Dashboard() {
           {backendScore?.data_quality && (
             <div className={`mt-8 text-[13px] px-4 py-1.5 rounded-full border tracking-wide uppercase ${
               backendScore.data_quality.entry_count >= 14
-                ? 'bg-emerald-500/5 text-emerald-400 border-emerald-500/20'
+                ? 'bg-[#FFC857]/5 text-[#FFC857] border-[#FFC857]/20'
                 : backendScore.data_quality.entry_count > 0
-                ? 'bg-amber-500/5 text-amber-400 border-amber-500/20'
-                : 'bg-rose-500/5 text-rose-400 border-rose-500/20'
+                ? 'bg-[#FF8C00]/5 text-[#FF8C00] border-[#FF8C00]/20'
+                : 'bg-red-500/5 text-red-400 border-red-500/20'
             }`}>
               {backendScore.data_quality.confidence_note}
             </div>
           )}
+
+          {/* Inline action buttons */}
+          <div className="flex items-center gap-3 mt-6">
+            <button onClick={() => setShowEntryForm(true)} className="px-4 py-2 rounded-lg text-sm font-medium border border-[#FF8C00]/40 text-[#FFC857] hover:bg-[#FF8C00]/10 transition-colors">
+              Log Today
+            </button>
+            <button onClick={computeBackendScore} disabled={computing} className="px-4 py-2 rounded-lg text-sm font-medium bg-gradient-to-br from-[#FF8C00] to-[#FFC857] text-black hover:opacity-90 transition-opacity">
+              {computing ? 'Computing...' : 'Refresh Score'}
+            </button>
+          </div>
         </div>
 
-        {/* Improve Score Tips */}
-        <div className="lg:col-span-4 xl:col-span-3 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 flex flex-col hover:border-slate-700 transition-colors">
-          <h3 className="text-[13px] font-semibold text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
+        {/* Quick Improvements — Dynamic & Routed */}
+        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 flex flex-col hover:border-[#FF8C00]/20 transition-colors">
+          <h3 className="text-[13px] font-semibold text-neutral-500 uppercase tracking-wider mb-4 flex items-center gap-2">
             <span className="text-base">⚡</span> Quick Improvements
           </h3>
           
-          <div className="flex-1 space-y-4">
-            {recommendations.slice(0, 3).map((rec, i) => (
-              <div key={i} className="bg-slate-800/30 p-4 rounded-xl border border-slate-700/50 hover:bg-slate-800/60 transition-colors">
-                <p className="text-[14px] font-medium text-slate-200 mb-3 leading-snug">{rec.action}</p>
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] text-slate-500 flex items-center gap-1.5">⏱ {rec.timeframe}</span>
-                  <span className="text-[13px] font-bold text-teal-400 bg-teal-500/10 px-2.5 py-1 rounded">+{rec.impact_min}-{rec.impact_max} pts</span>
+          <div className="flex-1 flex flex-col">
+            {quickImprovements.map((item, i) => (
+              <button
+                key={i}
+                onClick={() => onNavigate?.(item.page)}
+                className="flex justify-between items-center py-3.5 border-b border-neutral-800/50 last:border-0 text-left hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors group w-full"
+              >
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <span className="text-base shrink-0">{item.icon}</span>
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-medium text-neutral-200 group-hover:text-white transition-colors leading-snug">{item.title}</p>
+                    <p className="text-[11px] text-neutral-600 mt-0.5">⏱ {item.timeframe}</p>
+                  </div>
                 </div>
-              </div>
+                <div className="flex items-center gap-2 shrink-0 ml-2">
+                  <span className="text-[12px] font-bold text-[#FFC857]">{item.impact}</span>
+                  <span className="text-neutral-600 text-sm group-hover:text-[#FF8C00] transition-colors">→</span>
+                </div>
+              </button>
             ))}
           </div>
         </div>
@@ -479,8 +490,8 @@ export default function Dashboard() {
       </div>
 
       {/* ROW 2: Upcoming Payments & Trend Graph */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-7 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 md:p-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div className="lg:col-span-7 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 md:p-8">
           <div className="flex justify-between items-end mb-6">
             <h3 className="text-[13px] font-semibold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
               <span className="text-base">📅</span> Upcoming Payments
@@ -518,13 +529,13 @@ export default function Dashboard() {
         </div>
 
         {/* Trend Graph */}
-        <div className="lg:col-span-5 bg-white/[0.02] border border-white/[0.06] shadow-none rounded-2xl p-6 md:p-8 flex flex-col">
-          <h3 className="text-[14px] font-semibold text-slate-400 uppercase tracking-wider mb-8 flex items-center gap-2">
+        <div className="lg:col-span-5 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 md:p-8 flex flex-col">
+          <h3 className="text-[14px] font-semibold text-neutral-500 uppercase tracking-wider mb-8 flex items-center gap-2">
             <span className="text-lg">📈</span> Trajectory Forecast
           </h3>
           <div className="flex-1 flex flex-col justify-center min-h-[220px]">
              <TrendChart data={scoreHistory} />
-             <p className="text-[13px] text-center text-slate-500 mt-8">
+             <p className="text-[13px] text-center text-neutral-600 mt-8">
                Historic variance logged across system resets.
              </p>
           </div>
@@ -532,25 +543,25 @@ export default function Dashboard() {
       </div>
 
       {/* ROW 3: Action Buttons */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
-          <div className="w-12 h-12 rounded-full bg-rose-500/10 text-rose-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-rose-500/20 transition-all">💳</div>
-          <span className="text-[15px] font-medium text-slate-200">Pay Outstanding Bills</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <button className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
+          <div className="w-12 h-12 rounded-full bg-[#FF8C00]/10 text-[#FF8C00] flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-[#FF8C00]/20 transition-all">💳</div>
+          <span className="text-[15px] font-medium text-neutral-200">Pay Outstanding Bills</span>
         </button>
-        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
-          <div className="w-12 h-12 rounded-full bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-amber-500/20 transition-all">📉</div>
-          <span className="text-[15px] font-medium text-slate-200">Reduce Active Debt</span>
+        <button className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
+          <div className="w-12 h-12 rounded-full bg-[#FFC857]/10 text-[#FFC857] flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-[#FFC857]/20 transition-all">📉</div>
+          <span className="text-[15px] font-medium text-neutral-200">Reduce Active Debt</span>
         </button>
-        <button className="bg-white/[0.02] border border-white/[0.06] shadow-none p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
-          <div className="w-12 h-12 rounded-full bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">💰</div>
-          <span className="text-[15px] font-medium text-slate-200">Boost Savings Rate</span>
+        <button className="bg-white/[0.02] border border-white/[0.05] p-5 rounded-2xl flex items-center justify-center gap-5 transition-all hover:bg-white/[0.04] group">
+          <div className="w-12 h-12 rounded-full bg-[#FF8C00]/10 text-[#FFC857] flex items-center justify-center text-xl group-hover:scale-110 group-hover:bg-[#FF8C00]/20 transition-all">💰</div>
+          <span className="text-[15px] font-medium text-neutral-200">Boost Savings Rate</span>
         </button>
       </div>
 
       {/* ===== DAILY ENTRY FORM MODAL ===== */}
       {showEntryForm && (
         <motion.div
-          className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-slate-950/60 backdrop-blur-md"
+          className="fixed inset-0 flex items-center justify-center z-50 p-4 bg-black/60 backdrop-blur-md"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}

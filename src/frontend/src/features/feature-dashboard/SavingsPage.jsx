@@ -1,231 +1,382 @@
 /**
- * SavingsPage — Animated piggy bank, savings progress, and goal tracker
+ * SavingsPage — Track savings goals with add-goal form and progress tracking.
+ * Mirrors the LenderDashboard (Active Loans) carbon dark aesthetic.
  */
 
-import { useState, useRef, useEffect } from 'react'
-import { motion, useInView } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useAuth } from '../feature-auth/AuthContext'
 
-const savingsGoals = []
+const LS_KEY = 'finfix_savings_goals'
 
-function AnimatedNumber({ target, duration = 1500, prefix = '' }) {
-  const [value, setValue] = useState(0)
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true })
+const GOAL_PRESETS = [
+  { id: 'emergency', label: 'Emergency Fund', icon: '🛡️' },
+  { id: 'vacation', label: 'Vacation', icon: '✈️' },
+  { id: 'gadget', label: 'New Gadget', icon: '📱' },
+  { id: 'education', label: 'Education', icon: '🎓' },
+  { id: 'vehicle', label: 'Vehicle', icon: '🚗' },
+  { id: 'home', label: 'Home Down Payment', icon: '🏠' },
+  { id: 'wedding', label: 'Wedding', icon: '💍' },
+  { id: 'custom', label: 'Custom', icon: '➕' },
+]
 
-  useEffect(() => {
-    if (!inView) return
-    const start = Date.now()
-    const timer = setInterval(() => {
-      const elapsed = Date.now() - start
-      const progress = Math.min(elapsed / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setValue(Math.round(target * eased))
-      if (progress >= 1) clearInterval(timer)
-    }, 16)
-    return () => clearInterval(timer)
-  }, [inView, target, duration])
-
-  return <span ref={ref}>{prefix}{value.toLocaleString()}</span>
+function loadGoals() {
+  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') } catch { return [] }
+}
+function saveGoals(goals) {
+  localStorage.setItem(LS_KEY, JSON.stringify(goals))
 }
 
-function GoalCard({ goal, index }) {
-  const ref = useRef(null)
-  const inView = useInView(ref, { once: true, margin: '-30px' })
-  const percent = Math.round((goal.current / goal.target) * 100)
-
-  return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, y: 20 }}
-      animate={inView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="glass-card rounded-2xl p-6"
-    >
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">{goal.icon}</span>
-          <h4 className="font-semibold text-[16px]">{goal.name}</h4>
-        </div>
-        <span className="text-[15px] font-bold" style={{ color: goal.color }}>{percent}%</span>
-      </div>
-
-      {/* Progress bar */}
-      <div className="h-2.5 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
-        <motion.div
-          className="h-full rounded-full"
-          style={{ background: `linear-gradient(90deg, ${goal.color}, ${goal.color}cc)` }}
-          initial={{ width: 0 }}
-          animate={inView ? { width: `${percent}%` } : { width: 0 }}
-          transition={{ duration: 1.2, delay: index * 0.1 + 0.2, ease: [0.4, 0, 0.2, 1] }}
-        />
-      </div>
-
-      <div className="flex justify-between mt-3">
-        <span className="text-[14px] text-[var(--color-text-muted)]">
-          ₹<AnimatedNumber target={goal.current} />
-        </span>
-        <span className="text-[14px] text-[var(--color-text-muted)]">₹{goal.target.toLocaleString()}</span>
-      </div>
-    </motion.div>
-  )
-}
-
-/** SVG Piggy Bank (elegant, not cartoonish) */
-function PiggyBank({ fillPercent }) {
-  return (
-    <motion.svg
-      viewBox="0 0 200 160"
-      className="w-full max-w-xs mx-auto"
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
-    >
-      {/* Glow filter */}
-      <defs>
-        <filter id="piggyGlow">
-          <feGaussianBlur stdDeviation="3" result="blur" />
-          <feMerge>
-            <feMergeNode in="blur" />
-            <feMergeNode in="SourceGraphic" />
-          </feMerge>
-        </filter>
-        <linearGradient id="piggyFill" x1="0" y1="1" x2="0" y2="0">
-          <stop offset="0%" stopColor="#c4652a" />
-          <stop offset={`${fillPercent}%`} stopColor="#d4a843" />
-          <stop offset={`${fillPercent}%`} stopColor="transparent" />
-          <stop offset="100%" stopColor="transparent" />
-        </linearGradient>
-        <linearGradient id="piggyOutline" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0%" stopColor="#d4a843" />
-          <stop offset="100%" stopColor="#c4652a" />
-        </linearGradient>
-      </defs>
-      
-      {/* Body */}
-      <ellipse cx="100" cy="90" rx="65" ry="45" fill="url(#piggyFill)" opacity="0.3" />
-      <ellipse cx="100" cy="90" rx="65" ry="45" fill="none" stroke="url(#piggyOutline)" strokeWidth="2" filter="url(#piggyGlow)" />
-      
-      {/* Head */}
-      <ellipse cx="155" cy="75" rx="22" ry="20" fill="none" stroke="url(#piggyOutline)" strokeWidth="2" />
-      
-      {/* Snout */}
-      <ellipse cx="172" cy="80" rx="8" ry="6" fill="none" stroke="#d4a843" strokeWidth="1.5" />
-      <circle cx="170" cy="79" r="1.5" fill="#d4a843" />
-      <circle cx="174" cy="79" r="1.5" fill="#d4a843" />
-      
-      {/* Eye */}
-      <circle cx="152" cy="70" r="2.5" fill="#d4a843" />
-      
-      {/* Ear */}
-      <path d="M 148 58 Q 145 48, 155 52" fill="none" stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
-      
-      {/* Coin slot */}
-      <motion.rect
-        x="90" y="42" width="20" height="3" rx="1.5"
-        fill="#d4a843"
-        animate={{ opacity: [0.5, 1, 0.5] }}
-        transition={{ duration: 2, repeat: Infinity }}
-      />
-      
-      {/* Legs */}
-      <rect x="62" y="125" width="8" height="16" rx="4" fill="none" stroke="#c4652a" strokeWidth="2" />
-      <rect x="82" y="125" width="8" height="16" rx="4" fill="none" stroke="#c4652a" strokeWidth="2" />
-      <rect x="112" y="125" width="8" height="16" rx="4" fill="none" stroke="#c4652a" strokeWidth="2" />
-      <rect x="132" y="125" width="8" height="16" rx="4" fill="none" stroke="#c4652a" strokeWidth="2" />
-      
-      {/* Tail */}
-      <path d="M 38 80 Q 28 70, 30 85 Q 32 95, 38 90" fill="none" stroke="#d4a843" strokeWidth="2" strokeLinecap="round" />
-
-      {/* Coin falling animation */}
-      <motion.g
-        animate={{ y: [0, 30], opacity: [1, 0] }}
-        transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 2 }}
-      >
-        <circle cx="100" cy="25" r="6" fill="none" stroke="#d4a843" strokeWidth="1.5" />
-        <text x="100" y="28" textAnchor="middle" fill="#d4a843" fontSize="8" fontWeight="bold">₹</text>
-      </motion.g>
-    </motion.svg>
-  )
+function fmtCurrency(n) {
+  return `₹${Number(n || 0).toLocaleString('en-IN')}`
 }
 
 export default function SavingsPage() {
-  const totalSaved = savingsGoals.reduce((sum, g) => sum + g.current, 0)
-  const totalTarget = savingsGoals.reduce((sum, g) => sum + g.target, 0)
-  const overallPercent = Math.round((totalSaved / totalTarget) * 100)
+  const { profile } = useAuth()
+  const [goals, setGoals] = useState([])
+  const [showForm, setShowForm] = useState(false)
+  const [expandedGoal, setExpandedGoal] = useState(null)
+  const [depositGoalId, setDepositGoalId] = useState(null)
+  const [depositAmount, setDepositAmount] = useState('')
+
+  const [form, setForm] = useState({
+    type: 'emergency', name: '', target_amount: '', monthly_contribution: '',
+    start_date: new Date().toISOString().split('T')[0],
+  })
+
+  useEffect(() => {
+    setGoals(loadGoals())
+  }, [])
+
+  function resetForm() {
+    setForm({
+      type: 'emergency', name: '', target_amount: '', monthly_contribution: '',
+      start_date: new Date().toISOString().split('T')[0],
+    })
+  }
+
+  function addGoal() {
+    const preset = GOAL_PRESETS.find(p => p.id === form.type)
+    const newGoal = {
+      id: `goal_${Date.now()}`,
+      type: form.type,
+      icon: preset?.icon || '🎯',
+      name: form.name || preset?.label || 'Unnamed Goal',
+      target_amount: parseFloat(form.target_amount) || 0,
+      current_amount: 0,
+      monthly_contribution: parseFloat(form.monthly_contribution) || 0,
+      start_date: form.start_date,
+      deposits: [],
+    }
+    const updated = [...goals, newGoal]
+    setGoals(updated)
+    saveGoals(updated)
+    resetForm()
+    setShowForm(false)
+  }
+
+  function removeGoal(id) {
+    const updated = goals.filter(g => g.id !== id)
+    setGoals(updated)
+    saveGoals(updated)
+  }
+
+  function addDeposit(goalId) {
+    const amount = parseFloat(depositAmount)
+    if (!amount || amount <= 0) return
+    const updated = goals.map(g => {
+      if (g.id !== goalId) return g
+      return {
+        ...g,
+        current_amount: g.current_amount + amount,
+        deposits: [...(g.deposits || []), { amount, date: new Date().toISOString().split('T')[0] }],
+      }
+    })
+    setGoals(updated)
+    saveGoals(updated)
+    setDepositGoalId(null)
+    setDepositAmount('')
+  }
+
+  // Stats
+  const totalSaved = goals.reduce((s, g) => s + (g.current_amount || 0), 0)
+  const totalTarget = goals.reduce((s, g) => s + (g.target_amount || 0), 0)
+  const monthlyTarget = goals.reduce((s, g) => s + (g.monthly_contribution || 0), 0)
+  const avgProgress = goals.length > 0
+    ? Math.round(goals.reduce((s, g) => s + (g.target_amount > 0 ? g.current_amount / g.target_amount * 100 : 0), 0) / goals.length)
+    : 0
+
+  const inputStyle = {
+    width: '100%', padding: '12px 14px', borderRadius: '12px',
+    background: '#0a0a0a', border: '1px solid #262626',
+    color: '#fafafa', fontSize: '14px', outline: 'none',
+    boxSizing: 'border-box',
+  }
+  const labelStyle = { fontSize: '12px', color: '#737373', display: 'block', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '1px' }
 
   return (
-    <div className="page-container pb-16" style={{ maxWidth: '960px' }}>
-      {/* Header */}
-      <motion.div
-        className="text-center mb-10"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-      >
-        <span className="inline-block px-5 py-2 rounded-full glass-warm text-[13px] font-medium text-[var(--color-gold)] mb-5">
-          ◇ SAVINGS TRACKER
-        </span>
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
-          Your <span className="text-gradient">Savings Journey</span>
-        </h1>
-        <p className="text-[16px] text-[var(--color-text-secondary)] leading-relaxed">
-          Building savings builds your credit score — every rupee counts.
-        </p>
-      </motion.div>
+    <main className="w-full min-h-screen bg-black text-neutral-50">
+      <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 24px 80px', display: 'flex', flexDirection: 'column', gap: '32px' }}>
 
-      {savingsGoals.length === 0 ? (
-        <div className="glass-card rounded-2xl p-14 text-center mt-8">
-          <span className="text-5xl mb-6 block opacity-50">🎯</span>
-          <h3 className="text-2xl font-semibold mb-3">No active savings goals</h3>
-          <p className="text-[var(--color-text-secondary)] text-[15px] mb-8 max-w-sm mx-auto leading-relaxed">
-            You haven't set up any savings goals yet. Creating a goal and contributing to it regularly helps build a strong credit profile.
-          </p>
-          <button className="btn-primary text-[15px] px-8 py-3">
-            + Create your first goal
-          </button>
-        </div>
-      ) : (
-        <>
-          {/* Piggy Bank + Total */}
-          <div className="glass-card rounded-2xl p-8 mb-8">
-            <div className="grid md:grid-cols-2 gap-8 items-center">
-              <PiggyBank fillPercent={overallPercent} />
-              <div className="text-center md:text-left">
-                <p className="text-[14px] text-[var(--color-text-muted)] mb-1.5">Total Saved</p>
-                <p className="text-4xl font-bold text-gradient mb-3">
-                  ₹<AnimatedNumber target={totalSaved} />
-                </p>
-                <p className="text-[15px] text-[var(--color-text-secondary)] mb-5">
-                  of ₹{totalTarget.toLocaleString()} goal ({overallPercent || 0}%)
-                </p>
-
-                {/* Overall progress */}
-                <div className="h-3 rounded-full overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
-                  <motion.div
-                    className="h-full rounded-full"
-                    style={{ background: 'linear-gradient(90deg, var(--color-teal), var(--color-cyan))' }}
-                    initial={{ width: 0 }}
-                    animate={{ width: `${overallPercent || 0}%` }}
-                    transition={{ duration: 1.5, ease: [0.4, 0, 0.2, 1] }}
-                  />
-                </div>
-
-                <p className="text-[14px] text-[var(--color-text-muted)] mt-4">
-                  💡 Savings discipline is worth <span className="text-teal-400 font-medium">25%</span> of your credit score
-                </p>
-              </div>
-            </div>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: 700, letterSpacing: '-0.5px' }}>Savings Goals</h1>
+            <p className="text-neutral-400" style={{ fontSize: '15px', marginTop: '4px' }}>Track your savings, set goals, and build your credit score</p>
           </div>
+          <motion.button
+            onClick={() => setShowForm(!showForm)}
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 0.97 }}
+            style={{
+              background: showForm ? 'transparent' : '#fafafa', color: showForm ? '#a3a3a3' : '#0a0a0a',
+              padding: '10px 24px', borderRadius: '12px', fontWeight: 600, fontSize: '14px',
+              border: showForm ? '1px solid #262626' : 'none', cursor: 'pointer',
+            }}
+          >
+            {showForm ? 'Cancel' : '+ New Goal'}
+          </motion.button>
+        </div>
 
-          {/* Goals grid */}
-          <h2 className="text-2xl font-bold mb-6">Savings <span className="text-gradient">Goals</span></h2>
-          <div className="grid md:grid-cols-2 gap-6">
-            {savingsGoals.map((goal, i) => (
-              <GoalCard key={goal.id} goal={goal} index={i} />
+        {/* Stats */}
+        {goals.length > 0 && (
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+            {[
+              { label: 'Total Saved', value: fmtCurrency(totalSaved), icon: '💰' },
+              { label: 'Monthly Target', value: fmtCurrency(monthlyTarget), icon: '📅' },
+              { label: 'Avg Progress', value: `${avgProgress}%`, icon: '📊' },
+            ].map((stat, i) => (
+              <div key={i} className="bg-neutral-900 border border-neutral-800 rounded-xl" style={{ padding: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '6px' }}>
+                  <span style={{ fontSize: '14px' }}>{stat.icon}</span>
+                  <span className="text-neutral-500" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.5px' }}>{stat.label}</span>
+                </div>
+                <p style={{ fontSize: '20px', fontWeight: 700, fontVariantNumeric: 'tabular-nums' }}>{stat.value}</p>
+              </div>
             ))}
           </div>
-        </>
-      )}
-    </div>
+        )}
+
+        {/* Add Goal Form */}
+        <AnimatePresence>
+          {showForm && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              style={{ overflow: 'hidden' }}
+            >
+              <div className="bg-neutral-900 border border-neutral-800 rounded-2xl" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <h3 style={{ fontSize: '16px', fontWeight: 700 }}>Create New Goal</h3>
+
+                {/* Goal type picker */}
+                <div>
+                  <label style={labelStyle}>Goal Type</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
+                    {GOAL_PRESETS.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => setForm({ ...form, type: p.id, name: p.id === 'custom' ? '' : p.label })}
+                        style={{
+                          padding: '10px 8px', borderRadius: '10px', fontSize: '13px', fontWeight: 500,
+                          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center',
+                          background: form.type === p.id ? 'rgba(255,140,0,0.12)' : '#0a0a0a',
+                          border: `1px solid ${form.type === p.id ? 'rgba(255,140,0,0.5)' : '#262626'}`,
+                          color: form.type === p.id ? '#FFC857' : '#a3a3a3',
+                        }}
+                      >
+                        <span>{p.icon}</span> {p.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {form.type === 'custom' && (
+                  <div>
+                    <label style={labelStyle}>Goal Name</label>
+                    <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="e.g. New Laptop" style={inputStyle} />
+                  </div>
+                )}
+
+                {/* Row: Target, Monthly Contribution */}
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+                  <div>
+                    <label style={labelStyle}>Target Amount (₹)</label>
+                    <input type="number" value={form.target_amount} onChange={e => setForm({ ...form, target_amount: e.target.value })} placeholder="50000" style={inputStyle} />
+                  </div>
+                  <div>
+                    <label style={labelStyle}>Monthly Contribution (₹)</label>
+                    <input type="number" value={form.monthly_contribution} onChange={e => setForm({ ...form, monthly_contribution: e.target.value })} placeholder="5000" style={inputStyle} />
+                  </div>
+                </div>
+
+                <motion.button
+                  onClick={addGoal}
+                  disabled={!form.target_amount}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  style={{
+                    width: '100%', padding: '14px', borderRadius: '12px', fontWeight: 600, fontSize: '15px',
+                    background: '#fafafa', color: '#0a0a0a', border: 'none', cursor: 'pointer',
+                    opacity: !form.target_amount ? 0.4 : 1,
+                  }}
+                >
+                  Create Goal
+                </motion.button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Goal Cards */}
+        {goals.length === 0 ? (
+          <div className="bg-neutral-900 border border-neutral-800 rounded-2xl" style={{ padding: '48px', textAlign: 'center' }}>
+            <p style={{ fontSize: '40px', marginBottom: '12px', opacity: 0.4 }}>🎯</p>
+            <p className="text-neutral-400" style={{ fontSize: '15px' }}>No savings goals yet. Click "+ New Goal" to start building your savings.</p>
+            <p className="text-neutral-600" style={{ fontSize: '13px', marginTop: '8px' }}>
+              💡 Savings discipline is worth <span className="text-[#FFC857] font-medium">25%</span> of your credit score
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {goals.map((goal, i) => {
+              const progress = goal.target_amount > 0 ? Math.round(goal.current_amount / goal.target_amount * 100) : 0
+              const remaining = Math.max(0, goal.target_amount - goal.current_amount)
+              const monthsToGo = goal.monthly_contribution > 0 ? Math.ceil(remaining / goal.monthly_contribution) : '∞'
+              const isExpanded = expandedGoal === goal.id
+
+              return (
+                <motion.div
+                  key={goal.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  className="bg-neutral-900 border border-neutral-800 rounded-2xl"
+                  style={{ padding: '20px', cursor: 'pointer' }}
+                  onClick={() => setExpandedGoal(isExpanded ? null : goal.id)}
+                >
+                  {/* Main row */}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flex: 1, minWidth: 0 }}>
+                      <div className="bg-neutral-950 border border-neutral-800 rounded-full" style={{ width: '42px', height: '42px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px', flexShrink: 0 }}>
+                        {goal.icon}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <p style={{ fontWeight: 600, fontSize: '15px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{goal.name}</p>
+                        <p className="text-neutral-500" style={{ fontSize: '13px' }}>
+                          {fmtCurrency(goal.monthly_contribution)}/mo · {monthsToGo === '∞' ? '—' : `${monthsToGo}mo to go`}
+                        </p>
+                      </div>
+                    </div>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <p style={{ fontWeight: 700, fontSize: '16px', fontVariantNumeric: 'tabular-nums' }}>{fmtCurrency(goal.current_amount)}</p>
+                      <p className={progress >= 75 ? 'text-[#FFC857]' : progress >= 40 ? 'text-[#FF8C00]' : 'text-neutral-400'} style={{ fontSize: '13px', fontWeight: 600 }}>
+                        {progress}% of {fmtCurrency(goal.target_amount)}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progress bar */}
+                  <div style={{ marginTop: '14px', height: '4px', borderRadius: '2px', background: '#171717', overflow: 'hidden' }}>
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${Math.min(progress, 100)}%` }}
+                      transition={{ duration: 0.8, ease: 'easeOut' }}
+                      style={{
+                        height: '100%', borderRadius: '2px',
+                        background: progress >= 75 ? '#FFC857' : progress >= 40 ? '#FF8C00' : '#525252',
+                      }}
+                    />
+                  </div>
+
+                  {/* Expanded details */}
+                  <AnimatePresence>
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        style={{ overflow: 'hidden' }}
+                      >
+                        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid #262626', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px' }}>
+                          {[
+                            { label: 'Target', value: fmtCurrency(goal.target_amount) },
+                            { label: 'Saved', value: fmtCurrency(goal.current_amount) },
+                            { label: 'Remaining', value: fmtCurrency(remaining) },
+                          ].map((d, j) => (
+                            <div key={j}>
+                              <p className="text-neutral-500" style={{ fontSize: '10px', textTransform: 'uppercase', letterSpacing: '1.5px', marginBottom: '4px' }}>{d.label}</p>
+                              <p style={{ fontSize: '15px', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{d.value}</p>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Deposit section */}
+                        <div style={{ marginTop: '14px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                          {depositGoalId === goal.id ? (
+                            <>
+                              <input
+                                type="number"
+                                value={depositAmount}
+                                onChange={e => setDepositAmount(e.target.value)}
+                                placeholder="Amount"
+                                onClick={e => e.stopPropagation()}
+                                style={{ ...inputStyle, flex: 1, padding: '8px 12px' }}
+                              />
+                              <button
+                                onClick={(e) => { e.stopPropagation(); addDeposit(goal.id) }}
+                                style={{
+                                  background: '#fafafa', color: '#0a0a0a', padding: '8px 16px',
+                                  borderRadius: '8px', fontSize: '13px', fontWeight: 600, border: 'none', cursor: 'pointer',
+                                }}
+                              >
+                                Add
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setDepositGoalId(null) }}
+                                style={{
+                                  background: 'transparent', border: '1px solid #262626', color: '#a3a3a3',
+                                  padding: '8px 12px', borderRadius: '8px', fontSize: '13px', cursor: 'pointer',
+                                }}
+                              >
+                                ✕
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); setDepositGoalId(goal.id) }}
+                                style={{
+                                  background: 'rgba(255,140,0,0.1)', border: '1px solid rgba(255,140,0,0.3)',
+                                  color: '#FFC857', padding: '6px 16px', borderRadius: '8px',
+                                  fontSize: '12px', fontWeight: 600, cursor: 'pointer',
+                                }}
+                              >
+                                + Add Deposit
+                              </button>
+                              <button
+                                onClick={(e) => { e.stopPropagation(); removeGoal(goal.id) }}
+                                style={{
+                                  background: 'transparent', border: '1px solid rgba(239,68,68,0.3)',
+                                  color: '#ef4444', padding: '6px 16px', borderRadius: '8px',
+                                  fontSize: '12px', fontWeight: 600, cursor: 'pointer', marginLeft: 'auto',
+                                }}
+                              >
+                                Remove
+                              </button>
+                            </>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </motion.div>
+              )
+            })}
+          </div>
+        )}
+
+      </div>
+    </main>
   )
 }

@@ -40,12 +40,12 @@ const pageTransition = {
   transition: { duration: 0.4, ease: [0.4, 0, 0.2, 1] },
 }
 
-function PageRenderer({ page }) {
+function PageRenderer({ page, onNavigate }) {
   return (
-    <div style={{ paddingTop: 'var(--page-padding-top, 90px)' }}>
+    <div style={{ paddingTop: 'var(--page-padding-top, 72px)' }}>
       <AnimatePresence mode="wait">
         <motion.div key={page} {...pageTransition}>
-          {page === 'dashboard' && <Dashboard />}
+          {page === 'dashboard' && <Dashboard onNavigate={onNavigate} />}
           {page === 'lender-dashboard' && <LenderDashboard />}
           {page === 'credit-engine' && <CreditEngine />}
           {page === 'alerts' && <AlertsPage />}
@@ -97,7 +97,7 @@ function AppContent() {
           onNavigate={setActivePage}
           onSignOut={signOut || (() => setView('home'))}
         />
-        <PageRenderer page={activePage} />
+        <PageRenderer page={activePage} onNavigate={setActivePage} />
         <ChimcharFloating />
       </div>
     )

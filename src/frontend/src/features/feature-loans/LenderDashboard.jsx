@@ -211,9 +211,9 @@ export default function LenderDashboard() {
                         style={{
                           padding: '10px 8px', borderRadius: '10px', fontSize: '13px', fontWeight: 500,
                           cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px', justifyContent: 'center',
-                          background: form.type === p.id ? 'rgba(20,184,166,0.12)' : '#0a0a0a',
-                          border: `1px solid ${form.type === p.id ? 'rgba(20,184,166,0.5)' : '#262626'}`,
-                          color: form.type === p.id ? '#14b8a6' : '#a3a3a3',
+                          background: form.type === p.id ? 'rgba(255,140,0,0.12)' : '#0a0a0a',
+                          border: `1px solid ${form.type === p.id ? 'rgba(255,140,0,0.5)' : '#262626'}`,
+                          color: form.type === p.id ? '#FFC857' : '#a3a3a3',
                         }}
                       >
                         <span>{p.icon}</span> {p.label}
@@ -389,8 +389,8 @@ export default function LenderDashboard() {
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 style={{
-                  background: 'rgba(20,184,166,0.1)', border: '1px solid rgba(20,184,166,0.3)',
-                  color: '#14b8a6', padding: '8px 18px', borderRadius: '10px',
+                  background: 'rgba(255,140,0,0.1)', border: '1px solid rgba(255,140,0,0.3)',
+                  color: '#FFC857', padding: '8px 18px', borderRadius: '10px',
                   fontSize: '13px', fontWeight: 600, cursor: 'pointer',
                   opacity: insightLoading ? 0.5 : 1,
                 }}
@@ -403,7 +403,7 @@ export default function LenderDashboard() {
               <div className="bg-neutral-900 border border-neutral-800 rounded-2xl" style={{ padding: '20px' }}>
                 {insightLoading ? (
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '8px 0' }}>
-                    <div style={{ width: '20px', height: '20px', border: '2px solid #262626', borderTopColor: '#14b8a6', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
+                    <div style={{ width: '20px', height: '20px', border: '2px solid #262626', borderTopColor: '#FF8C00', borderRadius: '50%', animation: 'spin 1s linear infinite' }} />
                     <p className="text-neutral-400" style={{ fontSize: '14px' }}>Analyzing your loan portfolio with Gemini AI...</p>
                   </div>
                 ) : (

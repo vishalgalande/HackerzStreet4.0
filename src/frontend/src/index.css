@@ -312,7 +312,7 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding-top: 7rem;
+  padding-top: 0.75rem;
   padding-left: 24px;
   padding-right: 24px;
 }

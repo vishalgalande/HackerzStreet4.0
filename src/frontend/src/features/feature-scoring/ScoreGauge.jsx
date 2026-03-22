@@ -53,10 +53,10 @@ export default function ScoreGauge({ score, band, bandColor, confidenceMargin, b
                 <feMergeNode in="SourceGraphic" />
               </feMerge>
             </filter>
-            {/* Arc gradient - Luminous Teal to Cyan */}
+            {/* Arc gradient - Burnt Orange to Amber */}
             <linearGradient id="arcGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#14b8a6" />
-              <stop offset="100%" stopColor="#06b6d4" />
+              <stop offset="0%" stopColor="#FF8C00" />
+              <stop offset="100%" stopColor="#FFC857" />
             </linearGradient>
           </defs>
 
