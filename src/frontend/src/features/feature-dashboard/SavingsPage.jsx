@@ -1,13 +1,13 @@
 /**
  * SavingsPage — Track savings goals with add-goal form and progress tracking.
- * Mirrors the LenderDashboard (Active Loans) carbon dark aesthetic.
+ * Supabase-backed via /api/savings endpoints.
  */
 
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useAuth } from '../feature-auth/AuthContext'
 
-const LS_KEY = 'finfix_savings_goals'
+const API = import.meta.env.VITE_API_URL || ''
 
 const GOAL_PRESETS = [
   { id: 'emergency', label: 'Emergency Fund', icon: '🛡️' },
@@ -20,20 +20,14 @@ const GOAL_PRESETS = [
   { id: 'custom', label: 'Custom', icon: '➕' },
 ]
 
-function loadGoals() {
-  try { return JSON.parse(localStorage.getItem(LS_KEY) || '[]') } catch { return [] }
-}
-function saveGoals(goals) {
-  localStorage.setItem(LS_KEY, JSON.stringify(goals))
-}
-
 function fmtCurrency(n) {
   return `₹${Number(n || 0).toLocaleString('en-IN')}`
 }
 
 export default function SavingsPage() {
-  const { profile } = useAuth()
+  const { profile, getToken } = useAuth()
   const [goals, setGoals] = useState([])
+  const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [expandedGoal, setExpandedGoal] = useState(null)
   const [depositGoalId, setDepositGoalId] = useState(null)
@@ -45,8 +39,22 @@ export default function SavingsPage() {
   })
 
   useEffect(() => {
-    setGoals(loadGoals())
-  }, [])
+    async function fetchGoals() {
+      const token = getToken()
+      if (!token) { setLoading(false); return }
+      try {
+        const res = await fetch(`${API}/api/savings`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+        })
+        if (res.ok) {
+          const data = await res.json()
+          setGoals(data.goals || [])
+        }
+      } catch {}
+      setLoading(false)
+    }
+    fetchGoals()
+  }, [getToken])
 
   function resetForm() {
     setForm({
@@ -55,10 +63,10 @@ export default function SavingsPage() {
     })
   }
 
-  function addGoal() {
+  async function addGoal() {
     const preset = GOAL_PRESETS.find(p => p.id === form.type)
-    const newGoal = {
-      id: `goal_${Date.now()}`,
+    const token = getToken()
+    const goalData = {
       type: form.type,
       icon: preset?.icon || '🎯',
       name: form.name || preset?.label || 'Unnamed Goal',
@@ -66,36 +74,52 @@ export default function SavingsPage() {
       current_amount: 0,
       monthly_contribution: parseFloat(form.monthly_contribution) || 0,
       start_date: form.start_date,
-      deposits: [],
+      deposits: '[]',
     }
-    const updated = [...goals, newGoal]
-    setGoals(updated)
-    saveGoals(updated)
+    try {
+      const res = await fetch(`${API}/api/savings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(goalData),
+      })
+      if (res.ok) {
+        const data = await res.json()
+        setGoals(prev => [data.goal, ...prev])
+      }
+    } catch {}
     resetForm()
     setShowForm(false)
   }
 
-  function removeGoal(id) {
-    const updated = goals.filter(g => g.id !== id)
-    setGoals(updated)
-    saveGoals(updated)
+  async function removeGoal(id) {
+    const token = getToken()
+    setGoals(prev => prev.filter(g => g.id !== id))
+    try {
+      await fetch(`${API}/api/savings/${id}`, {
+        method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${token}` },
+      })
+    } catch {}
   }
 
-  function addDeposit(goalId) {
+  async function addDeposit(goalId) {
     const amount = parseFloat(depositAmount)
     if (!amount || amount <= 0) return
-    const updated = goals.map(g => {
-      if (g.id !== goalId) return g
-      return {
-        ...g,
-        current_amount: g.current_amount + amount,
-        deposits: [...(g.deposits || []), { amount, date: new Date().toISOString().split('T')[0] }],
-      }
-    })
-    setGoals(updated)
-    saveGoals(updated)
+    const token = getToken()
+    const goal = goals.find(g => g.id === goalId)
+    if (!goal) return
+    const newAmount = (goal.current_amount || 0) + amount
+    const newDeposits = [...(goal.deposits || []), { amount, date: new Date().toISOString().split('T')[0] }]
+    setGoals(prev => prev.map(g => g.id !== goalId ? g : { ...g, current_amount: newAmount, deposits: newDeposits }))
     setDepositGoalId(null)
     setDepositAmount('')
+    try {
+      await fetch(`${API}/api/savings/${goalId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ current_amount: newAmount, deposits: JSON.stringify(newDeposits) }),
+      })
+    } catch {}
   }
 
   // Stats

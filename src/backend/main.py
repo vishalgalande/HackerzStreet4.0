@@ -29,6 +29,7 @@ from loan_routes import router as loan_router
 from timer_routes import router as timer_router
 from payment_reminders import router as cron_router
 from payment_routes import router as payment_router
+from savings_routes import router as savings_router
 
 app = FastAPI(
     title="Alternative Credit Risk Assessment API",
@@ -60,6 +61,7 @@ app.include_router(loan_router)      # /api/loans, /api/loans/active, /api/loans
 app.include_router(timer_router)     # /api/timer/start, /api/timer/active, /api/timer/cancel
 app.include_router(cron_router)      # /api/cron/payment-reminders
 app.include_router(payment_router)   # /api/payments (CRUD)
+app.include_router(savings_router)   # /api/savings (CRUD)
 
 
 @app.get("/")
