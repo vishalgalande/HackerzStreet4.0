@@ -2,6 +2,10 @@
 
 > **Team Strawhats** — Hackathon Project
 
+## 🌐 Live Demo
+
+> **Access the app here → [https://finfix.strawhats.co.in](https://finfix.strawhats.co.in/)**
+
 ---
 
 ## 📚 Documentation
