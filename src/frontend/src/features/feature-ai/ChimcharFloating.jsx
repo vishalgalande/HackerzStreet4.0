@@ -5,9 +5,55 @@ import usePayments from '../feature-payments/usePayments'
 
 const API = import.meta.env.VITE_API_URL || ''
 
+function renderMarkdown(text) {
+  if (!text) return text
+  const lines = text.split('\n')
+  const elements = []
+  let listItems = []
+
+  function flushList() {
+    if (listItems.length > 0) {
+      elements.push(<ul key={`ul-${elements.length}`} style={{ margin: '6px 0', paddingLeft: '18px', listStyleType: 'disc' }}>{listItems}</ul>)
+      listItems = []
+    }
+  }
+
+  function formatInline(str, keyPrefix) {
+    const parts = []
+    const regex = /\*\*(.+?)\*\*/g
+    let lastIndex = 0
+    let match
+    let idx = 0
+    while ((match = regex.exec(str)) !== null) {
+      if (match.index > lastIndex) parts.push(str.slice(lastIndex, match.index))
+      parts.push(<strong key={`${keyPrefix}-b${idx++}`} style={{ color: '#e5e5e5', fontWeight: 600 }}>{match[1]}</strong>)
+      lastIndex = regex.lastIndex
+    }
+    if (lastIndex < str.length) parts.push(str.slice(lastIndex))
+    return parts.length > 0 ? parts : str
+  }
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i]
+    const trimmed = line.trim()
+    if (!trimmed) {
+      flushList()
+      continue
+    }
+    const bulletMatch = trimmed.match(/^[\*\-•]\s+(.*)/)
+    if (bulletMatch) {
+      listItems.push(<li key={`li-${i}`} style={{ marginBottom: '4px' }}>{formatInline(bulletMatch[1], `li-${i}`)}</li>)
+    } else {
+      flushList()
+      elements.push(<p key={`p-${i}`} style={{ margin: '4px 0', lineHeight: 1.6 }}>{formatInline(trimmed, `p-${i}`)}</p>)
+    }
+  }
+  flushList()
+  return elements
+}
+
 export default function ChimcharFloating() {
   const [isOpen, setIsOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('chat')
   const [messages, setMessages] = useState([
     { id: '1', role: 'assistant', text: "Hey! I'm Chimchar 🔥, your financial guide. Ask me anything about credit scores, savings, or investments!" }
   ])
@@ -19,7 +65,7 @@ export default function ChimcharFloating() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, isTyping, activeTab, isOpen])
+  }, [messages, isTyping, isOpen])
 
   const handleSend = async (e) => {
     e.preventDefault()
@@ -87,127 +133,71 @@ export default function ChimcharFloating() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
             transition={{ type: 'spring', bounce: 0.3, duration: 0.5 }}
-            className="fixed w-[400px] h-[540px] bg-neutral-950 border border-white/5 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-[100]"
-            style={{ bottom: '96px', right: '24px' }}
+            className="fixed bg-neutral-950 border border-white/5 rounded-2xl shadow-2xl flex flex-col overflow-hidden z-[100]"
+            style={{ bottom: '96px', right: '24px', width: '380px', height: '520px', maxWidth: 'calc(100vw - 48px)', maxHeight: 'calc(100vh - 120px)' }}
           >
-            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between bg-neutral-950">
+            <div className="px-4 py-3 border-b border-white/5 flex items-center justify-between bg-neutral-950 shrink-0">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center text-sm">
+                <div className="w-8 h-8 rounded-full bg-neutral-800 border border-white/10 flex items-center justify-center text-sm shrink-0">
                   🔥
                 </div>
-                <div>
-                  <h3 className="text-[15px] font-bold text-white">Chimchar AI</h3>
-                  <p className="text-xs text-neutral-500 font-medium uppercase tracking-widest">Your Financial Guide</p>
+                <div style={{ minWidth: 0 }}>
+                  <h3 className="text-[14px] font-bold text-white" style={{ margin: 0 }}>Chimchar AI</h3>
+                  <p className="text-[10px] text-neutral-500 font-medium uppercase tracking-widest" style={{ margin: 0 }}>Your Financial Guide</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-800 text-neutral-500 transition-colors bg-transparent border-none cursor-pointer"
+                className="w-7 h-7 flex items-center justify-center rounded-full hover:bg-neutral-800 text-neutral-500 transition-colors bg-transparent border-none cursor-pointer shrink-0"
               >
                 ✕
               </button>
             </div>
 
-            <div className="flex px-4 pt-3 gap-6 border-b border-white/5">
-              {['chat', 'suggestions', 'insights'].map(tab => (
+            <div className="flex-1 overflow-y-auto p-4 bg-neutral-950" style={{ minHeight: 0 }}>
+              <div className="flex flex-col gap-3">
+                {messages.map(msg => (
+                  <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <div
+                      className={`text-[13px] leading-relaxed ${msg.role === 'user' ? 'bg-neutral-800 text-white rounded-2xl rounded-br-md' : 'bg-neutral-900 text-neutral-300 rounded-2xl rounded-bl-md'}`}
+                      style={{ maxWidth: '85%', padding: '10px 14px', wordBreak: 'break-word', overflow: 'hidden' }}
+                    >
+                      {msg.role === 'assistant' ? renderMarkdown(msg.text) : msg.text}
+                    </div>
+                  </div>
+                ))}
+                {isTyping && (
+                  <div className="flex justify-start">
+                    <div className="bg-neutral-900 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+                      <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} />
+                      <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} />
+                      <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} />
+                    </div>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+            </div>
+
+            <form onSubmit={handleSend} className="border-t border-white/5 bg-neutral-950 p-3 shrink-0">
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={inputVal}
+                  onChange={e => setInputVal(e.target.value)}
+                  placeholder="Ask Chimchar..."
+                  className="flex-1 bg-black border border-white/5 rounded-full px-4 py-2 text-white text-sm placeholder:text-neutral-600 outline-none focus:border-neutral-700 transition-colors"
+                  style={{ minWidth: 0 }}
+                />
                 <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={`pb-2 text-[13px] font-medium capitalize tracking-wide transition-colors bg-transparent border-none cursor-pointer ${activeTab === tab ? 'text-white font-semibold border-b border-white' : 'text-neutral-500 hover:text-neutral-300'}`}
-                  style={{ fontFamily: 'inherit' }}
+                  type="submit"
+                  disabled={!inputVal.trim() || isTyping}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-white transition-colors disabled:opacity-30 bg-transparent border-none cursor-pointer shrink-0"
                 >
-                  {tab}
+                  ↑
                 </button>
-              ))}
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 scrollbar-hide bg-neutral-950">
-              {activeTab === 'chat' && (
-                <div className="space-y-4">
-                  {messages.map(msg => (
-                    <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                      <div className={`max-w-[85%] text-sm leading-relaxed ${msg.role === 'user' ? 'bg-neutral-800 text-white rounded-2xl rounded-br-md p-3' : 'bg-neutral-900 text-neutral-300 rounded-2xl rounded-bl-md p-4'}`}>
-                        {msg.text}
-                      </div>
-                    </div>
-                  ))}
-                  {isTyping && (
-                    <div className="flex justify-start">
-                      <div className="bg-neutral-900 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
-                        <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0 }} />
-                        <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.2 }} />
-                        <motion.div className="w-1.5 h-1.5 rounded-full bg-neutral-600" animate={{ y: [0,-2,0] }} transition={{ repeat: Infinity, duration: 0.6, delay: 0.4 }} />
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-              )}
-
-              {activeTab === 'suggestions' && (
-                <div className="space-y-3">
-                  <div className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
-                    <p className="text-[11px] text-neutral-500 uppercase tracking-widest mb-1.5">Top Pick</p>
-                    <p className="text-[14px] text-neutral-200 font-medium mb-3">Park ₹45k in Liquid Funds</p>
-                    <button className="text-[13px] bg-white/[0.03] text-neutral-300 px-3 py-2 rounded-lg border border-white/[0.06] w-full hover:bg-white/[0.06] transition-colors cursor-pointer" style={{ fontFamily: 'inherit' }}>Execute strategy</button>
-                  </div>
-                  <div className="p-4 bg-white/[0.02] rounded-xl border border-white/[0.06]">
-                    <p className="text-[11px] text-neutral-500 uppercase tracking-widest mb-1.5">Credit Task</p>
-                    <p className="text-[14px] text-neutral-200 font-medium mb-3">Connect Utility Bill</p>
-                    <button className="text-[13px] bg-white/[0.03] text-neutral-300 px-3 py-2 rounded-lg border border-white/[0.06] w-full hover:bg-white/[0.06] transition-colors cursor-pointer" style={{ fontFamily: 'inherit' }}>Boost Score</button>
-                  </div>
-                </div>
-              )}
-
-              {activeTab === 'insights' && (
-                <div className="space-y-4">
-                  <div>
-                    <p className="text-[13px] text-neutral-500">Spending Behavior</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <div className="h-2 flex-1 bg-neutral-800 rounded-full overflow-hidden">
-                        <div className="h-full w-[60%] bg-emerald-400" />
-                      </div>
-                      <span className="text-[13px] text-neutral-300">Safe</span>
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-[13px] text-neutral-500">Impulse Risk</p>
-                    <div className="flex items-center gap-3 mt-1.5">
-                      <div className="h-2 flex-1 bg-neutral-800 rounded-full overflow-hidden">
-                        <div className="h-full w-[30%] bg-neutral-400" />
-                      </div>
-                      <span className="text-[13px] text-neutral-300">Low</span>
-                    </div>
-                  </div>
-                  <div className="bg-white/[0.02] border border-white/[0.06] p-4 rounded-xl mt-4">
-                    <p className="text-[14px] text-neutral-400 leading-relaxed">
-                      "You've shown excellent restraint this weekend. Maintaining this for 2 more weeks will positively impact your behavioral score tier."
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {activeTab === 'chat' && (
-              <form onSubmit={handleSend} className="border-t border-white/5 bg-neutral-950 p-4">
-                <div className="flex gap-2 items-center">
-                  <input
-                    type="text"
-                    value={inputVal}
-                    onChange={e => setInputVal(e.target.value)}
-                    placeholder="Ask Chimchar..."
-                    className="flex-1 bg-black border border-white/5 rounded-full px-4 py-2 text-white text-sm placeholder:text-neutral-600 outline-none focus:border-neutral-700 transition-colors"
-                  />
-                  <button
-                    type="submit"
-                    disabled={!inputVal.trim() || isTyping}
-                    className="w-8 h-8 rounded-full flex items-center justify-center text-neutral-600 hover:text-white transition-colors disabled:opacity-30 bg-transparent border-none cursor-pointer"
-                  >
-                    ↑
-                  </button>
-                </div>
-              </form>
-            )}
+              </div>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
