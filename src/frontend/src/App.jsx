@@ -23,7 +23,7 @@ import CreditEngine from './features/feature-scoring/CreditEngine'
 import AlertsPage from './features/feature-dashboard/AlertsPage'
 import SavingsPage from './features/feature-dashboard/SavingsPage'
 import AntiImpulsivity from './features/feature-dashboard/AntiImpulsivity'
-import LenderDashboard from './features/feature-loans/LenderDashboard'
+import ActivePayments from './features/feature-payments/ActivePayments'
 import ChimcharAssistant from './features/feature-ai/ChimcharAssistant'
 import ChimcharFloating from './features/feature-ai/ChimcharFloating'
 import Navbar from './components/Navbar'
@@ -46,7 +46,7 @@ function PageRenderer({ page, onNavigate }) {
       <AnimatePresence mode="wait">
         <motion.div key={page} {...pageTransition}>
           {page === 'dashboard' && <Dashboard onNavigate={onNavigate} />}
-          {page === 'lender-dashboard' && <LenderDashboard />}
+          {page === 'lender-dashboard' && <ActivePayments />}
           {page === 'credit-engine' && <CreditEngine />}
           {page === 'alerts' && <AlertsPage />}
           {page === 'savings' && <SavingsPage />}

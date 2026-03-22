@@ -385,3 +385,66 @@ def build_timer_complete_email(
     """
     return subject, html_body
 
+
+def build_payment_reminder_email(
+    user_name: str,
+    payment_name: str,
+    payment_amount: float,
+    payment_type: str,
+    due_date_str: str,
+    reminder_type: str,
+) -> tuple[str, str]:
+    emoji = "⏰" if reminder_type == "upcoming" else "🔴"
+    headline = f"Payment due in 3 days" if reminder_type == "upcoming" else "Payment due today"
+    subject = f"{emoji} {headline}: {payment_name} — ₹{payment_amount:,.0f}"
+
+    type_labels = {"loan": "EMI / Loan", "cc": "Credit Card", "bill": "Recurring Bill"}
+    type_label = type_labels.get(payment_type, "Payment")
+
+    urgency_color = "#F59E0B" if reminder_type == "upcoming" else "#EF4444"
+    urgency_bg = "rgba(245, 158, 11, 0.1)" if reminder_type == "upcoming" else "rgba(239, 68, 68, 0.1)"
+
+    html_body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
+    <body style="margin: 0; padding: 0; background: #0A0A0A; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+        <div style="max-width: 560px; margin: 0 auto; background: #111111; border-radius: 16px; overflow: hidden; border: 1px solid #262626;">
+
+            <div style="padding: 32px; background: linear-gradient(135deg, {urgency_color} 0%, #FF8C00 100%); text-align: center;">
+                <p style="font-size: 48px; margin: 0 0 12px 0;">{emoji}</p>
+                <h1 style="color: white; font-size: 22px; font-weight: 800; margin: 0 0 6px 0; letter-spacing: -0.5px;">
+                    {headline.upper()}
+                </h1>
+                <p style="color: rgba(255,255,255,0.85); font-size: 14px; margin: 0;">
+                    {user_name}, don't miss this payment.
+                </p>
+            </div>
+
+            <div style="padding: 32px;">
+                <div style="background: {urgency_bg}; border: 1px solid {urgency_color}33; border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+                    <p style="color: #A3A3A3; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin: 0 0 8px 0;">Payment Details</p>
+                    <p style="color: #FAFAFA; font-size: 18px; font-weight: 700; margin: 0 0 6px 0;">{payment_name}</p>
+                    <p style="color: #A3A3A3; font-size: 13px; margin: 0 0 16px 0;">{type_label} · Due {due_date_str}</p>
+                    <p style="color: {urgency_color}; font-size: 28px; font-weight: 800; margin: 0; font-variant-numeric: tabular-nums;">
+                        ₹{payment_amount:,.0f}
+                    </p>
+                </div>
+
+                <p style="color: #737373; font-size: 14px; line-height: 1.6; margin: 0;">
+                    {"This is a friendly heads-up. You have 3 days to arrange the payment. On-time payments directly boost your FinFix credit score." if reminder_type == "upcoming" else "This payment is due today. Paying on time keeps your credit score healthy and avoids late fees."}
+                </p>
+            </div>
+
+            <div style="padding: 20px 32px; background: #0A0A0A; text-align: center; border-top: 1px solid #262626;">
+                <p style="color: #525252; font-size: 11px; margin: 0;">
+                    FinFix Payment Reminders · Keeping your credit score on track<br>
+                    <a href="https://finfix.strawhats.co.in" style="color: #FF8C00; text-decoration: none;">Manage payments →</a>
+                </p>
+            </div>
+        </div>
+    </body>
+    </html>
+    """
+    return subject, html_body
+

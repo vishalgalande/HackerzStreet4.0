@@ -10,8 +10,7 @@ const navItems = [
   { id: 'dashboard', label: 'Dashboard', icon: '◎' },
   { id: 'chimchar', label: 'Chimchar AI', icon: '🔥' },
   { id: 'credit-engine', label: 'Credit Engine', icon: '⚡' },
-  { id: 'lender-dashboard', label: 'Active Loans', icon: '🏦' },
-  { id: 'alerts', label: 'Alerts', icon: '◈' },
+  { id: 'lender-dashboard', label: 'Active Payments', icon: '🏦' },
   { id: 'savings', label: 'Savings', icon: '◇' },
   { id: 'anti-impulse', label: 'Anti Impulse', icon: '◷' },
 ]
@@ -27,7 +26,7 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
       borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
       height: '72px',
     }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 32px', height: '100%' }}>
+      <div style={{ maxWidth: '1440px', margin: '0 auto', padding: '0 32px', height: '100%' }}>
         <div className="flex items-center justify-between" style={{ height: '100%' }}>
           {/* Logo */}
           <motion.div
@@ -52,9 +51,10 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
                   onClick={() => onNavigate(item.id)}
                   className="relative transition-all duration-200"
                   style={{
-                    padding: '8px 14px',
+                    padding: '8px 12px',
                     borderRadius: '8px',
-                    fontSize: '15px',
+                    fontSize: '13px',
+                    whiteSpace: 'nowrap',
                     fontWeight: isActive ? 600 : 500,
                     color: isActive ? '#ffffff' : '#94a3b8',
                     background: isActive ? 'rgba(255, 140, 0, 0.10)' : 'transparent',
@@ -84,7 +84,25 @@ export default function Navbar({ activePage, onNavigate, onSignOut }) {
           </div>
 
           {/* Right side */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
+            <motion.button
+              onClick={() => onNavigate('alerts')}
+              className="relative hidden md:flex items-center justify-center rounded-lg transition-colors"
+              style={{
+                width: '38px',
+                height: '38px',
+                background: activePage === 'alerts' ? 'rgba(255, 140, 0, 0.10)' : 'transparent',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              title="Notifications"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={activePage === 'alerts' ? '#FF8C00' : '#94a3b8'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </motion.button>
             {onSignOut && (
               <motion.button
                 onClick={onSignOut}

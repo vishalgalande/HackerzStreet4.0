@@ -19,6 +19,7 @@ import Recommendations from '../feature-scoring/Recommendations'
 import WhatIfSimulator from '../feature-scoring/WhatIfSimulator'
 import RiskAssessment from '../feature-scoring/RiskAssessment'
 import { computeScore, getBand } from '../feature-scoring/scorer'
+import usePayments from '../feature-payments/usePayments'
 
 const ENTRIES_KEY = 'hackerzstreet_entries'
 
@@ -196,6 +197,8 @@ function TrendChart({ data }) {
 
 export default function Dashboard({ onNavigate }) {
   const { user, profile, getToken, signOut } = useAuth()
+  const { getUpcoming } = usePayments()
+  const upcomingPayments = getUpcoming(3)
   const [activeTab, setActiveTab] = useState('overview')
   const [entries, setEntries] = useState(() => loadEntries())
   const [showEntryForm, setShowEntryForm] = useState(false)
@@ -403,7 +406,7 @@ export default function Dashboard({ onNavigate }) {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         
         {/* Bills & Loans */}
-        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 flex flex-col justify-between hover:border-[#FF8C00]/20 transition-colors">
+        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl flex flex-col items-center text-center justify-between hover:border-[#FF8C00]/20 transition-colors" style={{ padding: '32px' }}>
           <div>
             <h3 className="text-[13px] font-semibold text-neutral-500 uppercase tracking-wider mb-6 flex items-center gap-2">
               <span className="text-base">◎</span> Bills & Loans
@@ -459,7 +462,7 @@ export default function Dashboard({ onNavigate }) {
         </div>
 
         {/* Quick Improvements — Dynamic & Routed */}
-        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 flex flex-col hover:border-[#FF8C00]/20 transition-colors">
+        <div className="lg:col-span-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl flex flex-col hover:border-[#FF8C00]/20 transition-colors" style={{ padding: '32px' }}>
           <h3 className="text-[13px] font-semibold text-neutral-500 uppercase tracking-wider mb-4 flex items-center gap-2">
             <span className="text-base">⚡</span> Quick Improvements
           </h3>
@@ -469,7 +472,7 @@ export default function Dashboard({ onNavigate }) {
               <button
                 key={i}
                 onClick={() => onNavigate?.(item.page)}
-                className="flex justify-between items-center py-3.5 border-b border-neutral-800/50 last:border-0 text-left hover:bg-white/[0.02] -mx-2 px-2 rounded-lg transition-colors group w-full"
+                className="flex justify-between items-center py-3.5 border-b border-neutral-800/50 last:border-0 text-left hover:bg-white/[0.02] px-1 rounded-lg transition-colors group w-full"
               >
                 <div className="flex items-center gap-3 flex-1 min-w-0">
                   <span className="text-base shrink-0">{item.icon}</span>
@@ -491,40 +494,32 @@ export default function Dashboard({ onNavigate }) {
 
       {/* ROW 2: Upcoming Payments & Trend Graph */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 bg-white/[0.02] border border-white/[0.05] rounded-2xl p-6 md:p-8">
+        <div className="lg:col-span-7 bg-white/[0.02] border border-white/[0.05] rounded-2xl" style={{ padding: '32px' }}>
           <div className="flex justify-between items-end mb-6">
             <h3 className="text-[13px] font-semibold text-neutral-400 uppercase tracking-widest flex items-center gap-2">
               <span className="text-base">📅</span> Upcoming Payments
             </h3>
-            <button className="text-[13px] text-[#FFC857] opacity-80 hover:opacity-100 transition-opacity">
+            <button onClick={() => onNavigate?.('lender-dashboard')} className="text-[13px] text-[#FFC857] opacity-80 hover:opacity-100 transition-opacity" style={{ background: 'none', border: 'none', cursor: 'pointer' }}>
               View All
             </button>
           </div>
           
           <div className="flex flex-col">
-            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
-              <div className="flex flex-col gap-1">
-                <span className="text-[14px] font-medium text-neutral-200">Lumiere Energy</span>
-                <span className="text-[12px] text-neutral-500">Utility • Tomorrow</span>
-              </div>
-              <span className="text-[14px] font-bold text-neutral-50">₹1,450</span>
-            </div>
-            
-            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
-              <div className="flex flex-col gap-1">
-                <span className="text-[14px] font-medium text-neutral-200">AirNet Telecom</span>
-                <span className="text-[12px] text-neutral-500">Internet • Oct 14</span>
-              </div>
-              <span className="text-[14px] font-bold text-neutral-50">₹999</span>
-            </div>
-            
-            <div className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
-              <div className="flex flex-col gap-1">
-                <span className="text-[14px] font-medium text-neutral-200">HDFC Auto Loan</span>
-                <span className="text-[12px] text-neutral-500">EMI • Oct 20</span>
-              </div>
-              <span className="text-[14px] font-bold text-neutral-50">₹12,500</span>
-            </div>
+            {upcomingPayments.length === 0 ? (
+              <p className="text-neutral-500 text-sm" style={{ padding: '16px 0' }}>No payments yet — <span className="text-[#FFC857] cursor-pointer" onClick={() => onNavigate?.('lender-dashboard')}>add in Active Payments</span></p>
+            ) : (
+              upcomingPayments.map((p, i) => (
+                <div key={p.id || i} className="flex justify-between items-center py-3 border-b border-white/[0.04] last:border-0">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[14px] font-medium text-neutral-200">{p.name}</span>
+                    <span className="text-[12px] text-neutral-500">
+                      {p.type === 'loan' ? 'EMI' : p.type === 'cc' ? 'Credit Card' : p.category || 'Bill'} • {p.nextDue ? new Date(p.nextDue).toLocaleDateString('en-IN', { month: 'short', day: 'numeric' }) : '—'}
+                    </span>
+                  </div>
+                  <span className="text-[14px] font-bold text-neutral-50">₹{(p.monthlyAmount || 0).toLocaleString('en-IN')}</span>
+                </div>
+              ))
+            )}
           </div>
         </div>
 

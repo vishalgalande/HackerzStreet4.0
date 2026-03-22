@@ -14,6 +14,8 @@ const typeConfig = {
   score_alert: { icon: '📉', color: '#EF4444', label: 'Score Alert' },
   spending_spike: { icon: '💸', color: '#F59E0B', label: 'Spending Alert' },
   timer_complete: { icon: '⏰', color: '#14B8A6', label: 'Timer Complete' },
+  payment_reminder: { icon: '🔔', color: '#FF8C00', label: 'Payment Reminder' },
+  payment_due_today: { icon: '🔴', color: '#EF4444', label: 'Payment Due Today' },
   test: { icon: '🎉', color: '#6366F1', label: 'Test Email' },
   general: { icon: '📧', color: '#06B6D4', label: 'Notification' },
 }
